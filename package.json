@@ -1,0 +1,66 @@
+{
+  "name": "task-manager-eink",
+  "version": "1.0.0",
+  "description": "a local-only small task manager for eink tablets",
+  "keywords": [
+    "react",
+    "zustand",
+    "pwa",
+    "task-manager",
+    "eink"
+  ],
+  "homepage": "https://github.com/AlexisRoe/task-manager-eink#readme",
+  "bugs": {
+    "url": "https://github.com/AlexisRoe/task-manager-eink/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AlexisRoe/task-manager-eink.git"
+  },
+  "license": "MIT",
+  "author": "Alexis Roehrling",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "format": "biome format --write .",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "coverage": "vitest run --coverage",
+    "security": "npm audit --audit-level=high && npm audit signatures",
+    "outdated": "npm outdated | grep -vE \"typescript|@types/node\" || true",
+    "check": "npm run lint && npm run typecheck && npm run coverage && npm run build"
+  },
+  "private": true,
+  "engines": {
+    "node": ">=24.17.0"
+  },
+  "dependencies": {
+    "e-ink-ui-lib": "1.1.1",
+    "idb-keyval": "6.3.0",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "zustand": "5.1.0"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.6.8",
+    "@testing-library/jest-dom": "8.0.0",
+    "@testing-library/react": "16.3.3",
+    "@testing-library/user-event": "14.6.13",
+    "@types/node": "24.0.0",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "@vitejs/plugin-react": "6.3.0",
+    "@vitest/coverage-v8": "5.1.1",
+    "fake-indexeddb": "6.2.8",
+    "jsdom": "31.0.1",
+    "typescript": "6.0.3",
+    "vite": "8.3.8",
+    "vite-plugin-pwa": "2.0.0",
+    "vitest": "5.1.1"
+  }
+}

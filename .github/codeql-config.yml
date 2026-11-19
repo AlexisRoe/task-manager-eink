@@ -1,0 +1,3 @@
+name: Daybook CodeQL config
+paths-ignore:
+  - prototype
