@@ -51,7 +51,9 @@
 }
 
 .week-column__date {
-  font-size: var(--eink-size-32);
+  font-family: var(--eink-font-family-secondary);
+  font-size: var(--eink-size-36);
+  line-height: 1;
 }
 
 .week-column__progress {
@@ -77,6 +79,11 @@
 }
 
 .week-column__item-time {
+  font-family: var(--eink-font-family-main);
+  font-size: var(--eink-size-14);
+}
+
+.week-column__item-title {
   font-family: var(--eink-font-family-secondary);
 }
 

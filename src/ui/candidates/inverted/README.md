@@ -17,6 +17,7 @@ reviewed_by: "user:pending"
 
 ## Key Features
 - Re-maps `--eink-color-primary`, `--eink-color-secondary` and `--eink-color-background` inside its subtree
+- Re-declares the composite `--eink-border-*` tokens, which the theme resolves at `:root` and which would otherwise stay black
 - Works with every library component because they all read those tokens
 - `active` toggles the inversion without changing the DOM structure
 
