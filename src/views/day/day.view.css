@@ -1,0 +1,132 @@
+.day-view {
+  display: flex;
+  flex-direction: column;
+  gap: var(--eink-size-16);
+  height: 100%;
+}
+
+.day-view__heading {
+  display: flex;
+  align-items: baseline;
+  gap: var(--eink-size-16);
+}
+
+.day-view__heading > h1 {
+  margin: 0;
+}
+
+.day-view__progress {
+  margin-left: auto;
+}
+
+.day-view__columns {
+  display: grid;
+  flex: 1;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--eink-size-32);
+  min-height: 0;
+}
+
+.day-view__timeline {
+  min-height: 0;
+}
+
+.day-view__block-time {
+  font-family: var(--eink-font-family-secondary);
+}
+
+.day-view__lists {
+  display: flex;
+  flex-direction: column;
+  gap: var(--eink-size-24);
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.carry-over {
+  display: flex;
+  flex-direction: column;
+  gap: var(--eink-size-8);
+}
+
+.carry-over__actions {
+  display: flex;
+  gap: var(--eink-size-8);
+}
+
+.task-list__header {
+  display: flex;
+  justify-content: space-between;
+}
+
+.task-list__items {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.task-row {
+  padding: var(--eink-size-8) 0;
+}
+
+.task-row[data-expanded="true"] {
+  background-color: var(--eink-color-grey-90);
+}
+
+.task-row__main {
+  display: flex;
+  align-items: center;
+  gap: var(--eink-size-12);
+}
+
+.task-row__body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  padding: 0;
+  border: none;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.task-row__meta {
+  color: var(--eink-color-grey-40);
+}
+
+.task-row[data-done="true"] .task-row__title {
+  color: var(--eink-color-grey-60);
+  text-decoration: line-through;
+}
+
+.task-row__time {
+  min-width: var(--eink-size-128);
+  text-align: right;
+  font-family: var(--eink-font-family-secondary);
+}
+
+.task-row__details {
+  display: flex;
+  flex-direction: column;
+  gap: var(--eink-size-8);
+  padding-left: var(--eink-size-48);
+}
+
+.task-row__actions {
+  display: flex;
+  gap: var(--eink-size-8);
+}
+
+.new-task {
+  display: flex;
+  flex-direction: column;
+  gap: var(--eink-size-16);
+}
+
+.new-task__row {
+  display: flex;
+  align-items: center;
+  gap: var(--eink-size-16);
+}

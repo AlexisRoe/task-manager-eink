@@ -1,0 +1,11 @@
+.eink-inverted {
+  box-sizing: border-box;
+}
+
+.eink-inverted--active {
+  --eink-color-primary: var(--eink-color-overlay-white);
+  --eink-color-secondary: var(--eink-color-overlay-black);
+  --eink-color-background: var(--eink-color-overlay-black);
+  background-color: var(--eink-color-background);
+  color: var(--eink-color-primary);
+}
