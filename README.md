@@ -89,7 +89,6 @@ flowchart TD
 
   UI["ui/index.ts<br/>(only UI import point)"]
   Lib[e-ink-ui-lib]
-  Cand["ui/candidates/<br/>Segmented, TimeGrid,<br/>Heatmap, Inverted"]
 
   Hooks["hooks/<br/>day, week, history, actions"]
   Sel["store/tasks.selectors.ts<br/>materialize recurring occurrences"]
@@ -102,7 +101,6 @@ flowchart TD
 
   Views --> UI
   UI --> Lib
-  UI --> Cand
   Views --> Hooks
   Hooks --> Sel
   Hooks --> Tasks
@@ -118,7 +116,7 @@ flowchart TD
 - **State:** tasks are persisted to IndexedDB; transient UI state is kept separately and never persisted.
 - **Recurrence:** recurring tasks are stored as a series plus per-date occurrence state and materialized per day in the selectors; generated occurrences are never stored.
 - **Dates:** local `YYYY-MM-DD` strings and `HH:MM` times handled by pure utilities, no date library.
-- **UI:** components come only from `e-ink-ui-lib` through `src/ui/index.ts`. Missing components are built as candidates in `src/ui/candidates/` so they can be contributed upstream. App CSS is layout only.
+- **UI:** components come only from `e-ink-ui-lib` through `src/ui/index.ts`. Missing components are built as candidates in `src/ui/candidates/` (none at the moment) and contributed upstream. App CSS is layout only.
 - **PWA:** `vite-plugin-pwa` generates the service worker and manifest; `public/_headers` carries the CSP and security headers.
 
 More background lives in `CONCEPT.md` (intent), `PLAN.md` (roadmap), `CLAUDE.md` (conventions) and `docs/decisions/` (ADRs).
