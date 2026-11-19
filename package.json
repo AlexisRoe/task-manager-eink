@@ -1,0 +1,27 @@
+{
+  "name": "task-manager-eink",
+  "version": "1.0.0",
+  "description": "a local-only small task manager for eink tablets",
+  "keywords": [
+    "react",
+    "zustand",
+    "pwa",
+    "task-manager",
+    "eink"
+  ],
+  "homepage": "https://github.com/AlexisRoe/task-manager-eink#readme",
+  "bugs": {
+    "url": "https://github.com/AlexisRoe/task-manager-eink/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AlexisRoe/task-manager-eink.git"
+  },
+  "license": "MIT",
+  "author": "Alexis Roehrling",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}
