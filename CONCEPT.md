@@ -10,6 +10,7 @@ I want an application, served as pwa (horizontal, standalone only) which is desi
 - vite
 - vitest
 - using ui-lib exclusivly (https://www.npmjs.com/package/e-ink-ui-lib, github.com/AlexisRoe/e-ink-ui-lib)
+- Typescript
 
 ## Design
 
@@ -24,3 +25,23 @@ Use the prototype and the screenshots to recreate the same logic internally
 ## Security
 
 Security-by-design has to be applied to local development, dependencies, tests, git pipelines, security checks, etc.
+
+## Documentation
+
+document all decisions made to build the application. 
+
+This application has to document all types, interfaces, methods and functions accordingly with JSDOCS. Document the intention/ purpose not the internals. 
+
+In-code comments are only allowed if abolsut necessary.
+
+## Code structure
+
+Structure the code for a react application. Files should end with their function: render.hook.ts or day.view.ts or button.component.ts
+
+Constants or config belong into dedicated files.
+
+Follow best-practises in isolating code and resuse as much as possible.
+
+## Deployment
+
+This application will be deployed to Cloudflare pages later on with Github actions when merged to main.
