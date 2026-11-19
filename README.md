@@ -6,6 +6,18 @@ Daybook is a landscape-only, standalone-only Progressive Web App for planning yo
 
 Everything stays on your device. Tasks live in IndexedDB, the app makes **no network requests** after it is installed, and there is no account, analytics or telemetry.
 
+This application was **reimplemented from a design prototype with security-by-design principles**: security requirements shaped the architecture, tooling and pipeline from the first commit instead of being added afterwards. See [Security by design](#security-by-design).
+
+## Table of contents
+
+- [Features](#features)
+- [Screenshots](#screenshots)
+- [Getting started](#getting-started)
+- [Architecture](#architecture)
+- [Security by design](#security-by-design)
+- [Deployment](#deployment)
+- [License](#license)
+
 ## Features
 
 - **Day view**: hour timeline with a live "now" marker, scheduled and "Anytime" lists, expandable rows with notes, move-to-tomorrow and delete.
@@ -111,9 +123,21 @@ flowchart TD
 
 More background lives in `CONCEPT.md` (intent), `PLAN.md` (roadmap), `CLAUDE.md` (conventions) and `docs/decisions/` (ADRs).
 
-## Security
+## Security by design
 
-See `SECURITY.md`. No third-party origins, strict CSP, validated persisted data, pinned dependencies and GitHub Actions pinned to commit SHAs.
+The original prototype loaded web fonts from Google, kept state in memory and had no build or review pipeline. The reimplementation treats security as a requirement of every layer. Vulnerability reporting and the threat model are in [`SECURITY.md`](SECURITY.md); each decision is recorded in [`docs/decisions/`](docs/decisions/).
+
+| Area | What it means here |
+|---|---|
+| **Data locality** | All data is stored in IndexedDB on the device. No network calls, telemetry, CDNs or third-party origins; fonts and assets are self-hosted. |
+| **Content-Security-Policy** | `public/_headers` sets `default-src 'self'`, no inline scripts or styles, `object-src 'none'`, `frame-ancestors 'none'`, `require-trusted-types-for 'script'`, plus `Permissions-Policy` (deny all), `Referrer-Policy: no-referrer`, `nosniff`, COOP and HSTS. The policy is never loosened to make something work; for example the UI library's inline base64 fonts are extracted at build time instead of allowing `data:` fonts. |
+| **Untrusted persisted data** | Stored data is validated with type guards on load, schema changes need a versioned migration, and corrupt data is reset with an in-app notice instead of crashing. |
+| **Input handling** | Every user input is trimmed, validated and length-limited (title 120, notes 1000 characters, `HH:MM` times, enumerated values). User text is only rendered as React text; `dangerouslySetInnerHTML`, `eval` and `new Function` are not used. IDs come from `crypto.randomUUID()`. |
+| **Dependencies** | Five runtime dependencies, exact versions pinned, lockfile committed, installs via `npm ci`, `ignore-scripts=true`, `engine-strict`. Each dependency is justified in an ADR. |
+| **Supply-chain checks** | `npm run security` runs `npm audit` (fails on high severity) and verifies registry signatures; Dependabot updates npm packages and GitHub Actions weekly. |
+| **CI/CD** | GitHub Actions are pinned to commit SHAs with least-privilege `permissions`, no persisted checkout credentials, dependency review, gitleaks secret scanning and CodeQL on every PR. Deployment runs only from `main` in a protected `production` environment with a project-scoped token. |
+| **Quality gates** | `npm run check` (lint, strict TypeScript, tests with enforced coverage thresholds, build) must pass before any change is done. |
+| **Secrets** | `.env*`, `.dev.vars` and Cloudflare tokens are git-ignored and never committed. |
 
 ## Deployment
 
