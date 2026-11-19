@@ -20,16 +20,29 @@
   gap: var(--eink-size-4);
 }
 
-.eink-heatmap__column-label,
+.eink-heatmap__column {
+  width: var(--eink-size-24);
+}
+
+.eink-heatmap__column-label {
+  display: block;
+  width: var(--eink-size-24);
+  height: var(--eink-size-24);
+  line-height: var(--eink-size-24);
+  white-space: nowrap;
+  overflow: visible;
+}
+
 .eink-heatmap__row-label {
+  display: block;
   height: var(--eink-size-24);
   line-height: var(--eink-size-24);
   white-space: nowrap;
 }
 
 .eink-heatmap__row-labels {
-  padding-top: var(--eink-size-24);
-  padding-right: var(--eink-size-8);
+  width: var(--eink-size-48);
+  margin-right: var(--eink-size-4);
 }
 
 .eink-heatmap__cell {
@@ -80,5 +93,9 @@
 .eink-heatmap__legend {
   display: flex;
   align-items: center;
-  gap: var(--eink-size-4);
+  gap: var(--eink-size-8);
+}
+
+.eink-heatmap__legend--indented {
+  margin-left: calc(var(--eink-size-48) + var(--eink-size-4));
 }

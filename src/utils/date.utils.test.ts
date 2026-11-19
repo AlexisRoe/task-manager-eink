@@ -87,6 +87,7 @@ describe("date.utils", () => {
     expect(formatWeekdayShort("2026-11-19")).toBe("Thu");
     expect(formatMonthShort("2026-11-19")).toBe("Nov");
     expect(dayOfMonth("2026-11-19")).toBe(19);
+    expect(formatMonthShort("2026-09-02")).toBe("Sep");
   });
 
   it("throws on invalid input where a date is required", () => {

@@ -59,6 +59,7 @@ export function Heatmap({
       <div className="eink-heatmap__grid">
         {rowLabels ? (
           <div className="eink-heatmap__row-labels" aria-hidden="true">
+            {columnLabels ? <span className="eink-heatmap__column-label" /> : null}
             {rowLabels.map((label, index) => (
               // biome-ignore lint/suspicious/noArrayIndexKey: static label list, positions are the identity
               <span key={index} className="eink-heatmap__row-label">
@@ -94,7 +95,12 @@ export function Heatmap({
         ))}
       </div>
       {legend ? (
-        <div className="eink-heatmap__legend">
+        <div
+          className={cx("eink-heatmap__legend", [
+            "eink-heatmap__legend--indented",
+            rowLabels !== undefined,
+          ])}
+        >
           <span>{legend.less}</span>
           {LEGEND_LEVELS.map((level) => (
             <span

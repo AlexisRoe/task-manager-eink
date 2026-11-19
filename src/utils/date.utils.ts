@@ -112,9 +112,9 @@ export function formatWeekdayShort(value: IsoDate): string {
   return formatDate(value, { weekday: "short" });
 }
 
-/** Short month name, e.g. "Nov". */
+/** Three-letter month name, e.g. "Sep" (locale abbreviations such as "Sept" are avoided). */
 export function formatMonthShort(value: IsoDate): string {
-  return formatDate(value, { month: "short" });
+  return formatDate(value, { month: "long" }).slice(0, 3);
 }
 
 /** Day of the month as a number. */
