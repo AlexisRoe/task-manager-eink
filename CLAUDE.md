@@ -23,7 +23,7 @@ Use `npm ci` to install (never plain `npm install` without intent to change the 
 ## UI rules
 - UI comes exclusively from `e-ink-ui-lib`, imported only through `src/ui/index.ts`.
 - App CSS is for layout only (grid/flex, spacing, positioning). No colors, fonts, borders or sizes beyond layout; use lib tokens (`var(--eink-*)`) where values are needed.
-- A missing component goes to `src/ui/candidates/<name>/` following the lib's conventions (`<name>.component.tsx`, `<name>.component.css` with `eink-` BEM + tokens only, `<name>.test.tsx`, OKF `README.md`, JSDoc), so it can be transferred to github.com/AlexisRoe/e-ink-ui-lib via PR and then swapped out.
+- A component the lib lacks is first built in `src/ui/candidates/<name>/` (the directory exists only while a candidate does; currently none) following the lib's conventions (`<name>.component.tsx`, `<name>.component.css` with `eink-` BEM + tokens only, `<name>.test.tsx`, OKF `README.md`, JSDoc), so it can be transferred to github.com/AlexisRoe/e-ink-ui-lib via PR; once released, bump the lib, remove the candidate and its export from `src/ui/index.ts` (see ADR 0013 for the last round).
 - Typography: lib fonts only (Inter, JetBrains Mono). No external font or asset loading.
 - No CSS transitions/animations (e-ink).
 
