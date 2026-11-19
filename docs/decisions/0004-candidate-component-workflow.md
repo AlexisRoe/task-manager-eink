@@ -1,6 +1,6 @@
 # 0004. Missing UI is built as candidates and upstreamed
 
-Date: 2026-11-19 · Status: accepted
+Date: 2026-11-19 · Status: accepted (all four candidates upstreamed in ADR 0013)
 
 ## Context
 The library lacks a controlled Segmented, a time grid, a heatmap and an inverted surface. App CSS may only do layout.

@@ -64,11 +64,11 @@ src/
                   delete-recurring-modal.component.tsx, task-row.component.tsx, priority-badge.component.tsx
   views/          day/day.view.tsx (+ task-list, carry-over parts), week/week.view.tsx (+ week-column),
                   history/history.view.tsx (+ stats, selected-day)
-  ui/             index.ts  ← single import facade: re-exports e-ink-ui-lib + local candidates
-  ui/candidates/<name>/  ← missing lib components, written in lib conventions (see §7)
+  ui/             index.ts  ← single import facade: re-exports e-ink-ui-lib (+ local candidates while any exist)
+  ui/candidates/<name>/  ← only while a lib component is missing; written in lib conventions (see §7). Currently none: all upstreamed in e-ink-ui-lib 1.2.0
   dev/            seed.fixture.ts (prototype demo data; loaded only when import.meta.env.DEV)
 ```
-App code imports UI **only** from `@/ui`, never directly from `e-ink-ui-lib` or `candidates/`, so swapping a candidate for the published lib version is a one-line change.
+App code imports UI **only** from `@/ui`, never directly from `e-ink-ui-lib` or `candidates/`, so swapping a candidate for the published lib version is a one-line change (done for all four, see ADR 0013).
 
 ## 6. Config & constants
 `app.config.ts`: `DAY_START_HOUR=0`, `DAY_END_HOUR=24`, `HOUR_HEIGHT_PX=88`, `HIDE_DONE=false`, `CARRY_PROMPT_ENABLED=true`, `NOW_TICK_MS=60000`. `storage.config.ts`: IDB db/store names, `SCHEMA_VERSION`. Limits (title/notes length) in `task.constants.ts`.
@@ -89,7 +89,7 @@ App code imports UI **only** from `@/ui`, never directly from `e-ink-ui-lib` or 
 | New-task modal | `Modal` (+ `CloseButton`/`ActionButton`), `Input`, `TimeInput`, `Chip.Group`, `TextArea`, `Form` |
 | Delete-recurring modal | `Modal` + `RadioInput` |
 
-Expected gaps → build as candidates in `src/ui/candidates/`, then PR to `AlexisRoe/e-ink-ui-lib`:
+Gaps found (all now upstreamed in e-ink-ui-lib 1.2.0) → were built as candidates in `src/ui/candidates/`, then PR to `AlexisRoe/e-ink-ui-lib`:
 1. **Segmented controlled mode** (`value` prop) — view changes from Week header / "Open this day".
 2. **TimeGrid** — vertical hour grid with absolutely positioned blocks + now-marker (lib `Schedule` is a list only).
 3. **Heatmap** — calendar contribution grid with bucket shades, legend, selectable cells.
@@ -146,7 +146,7 @@ Candidate workflow: same file layout as the lib (`<name>.component.tsx`, `.compo
 8. **History view.**
 9. **PWA + headers:** manifest, SW, `_headers`, update prompt, offline check.
 10. **CI/CD:** pr.yml, codeql.yml, dependabot.yml, deploy.yml.
-11. **Lib PRs:** move candidates to e-ink-ui-lib, release, swap imports, delete candidates.
+11. **Lib PRs:** move candidates to e-ink-ui-lib, release, swap imports, delete candidates. ✅ Done: lib 1.2.0, ADR 0013.
 
 ## 12. Verification
 - `npm run check` (lint + typecheck + tests with coverage ≥ 80 % + build) passes at every phase.
