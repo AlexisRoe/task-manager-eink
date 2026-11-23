@@ -5,14 +5,12 @@ import { defineConfig } from "vite";
 import { VitePWA } from "vite-plugin-pwa";
 import { extractInlineFontsPlugin } from "./plugins/extract-inline-fonts.plugin.ts";
 
-const isTest = process.env.VITEST === "true";
-
 export default defineConfig({
   plugins: [
     react(),
     extractInlineFontsPlugin(),
     VitePWA({
-      registerType: "prompt",
+      registerType: "autoUpdate",
       injectRegister: false,
       includeAssets: ["favicon.ico", "icons/*.png"],
       manifest: {
@@ -47,6 +45,7 @@ export default defineConfig({
         globPatterns: ["**/*.{js,css,html,ico,png,woff2,ttf}"],
         navigateFallback: "/index.html",
         cleanupOutdatedCaches: true,
+        inlineWorkboxRuntime: true,
         runtimeCaching: [],
       },
     }),
@@ -54,14 +53,6 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": resolve(import.meta.dirname, "src"),
-      ...(isTest
-        ? {
-            "virtual:pwa-register/react": resolve(
-              import.meta.dirname,
-              "src/test/pwa-register.stub.ts",
-            ),
-          }
-        : {}),
     },
   },
   test: {
