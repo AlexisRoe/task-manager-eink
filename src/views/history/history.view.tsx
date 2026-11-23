@@ -101,10 +101,9 @@ export function HistoryView() {
 
   return (
     <div className="history-view">
-      {portrait ? heading : null}
+      {heading}
       {showOverview ? (
         <div className="history-view__main">
-          {portrait ? null : heading}
           <section className="history-view__heatmap" aria-label="Tasks">
             <Title size="2">Tasks</Title>
             <Heatmap
