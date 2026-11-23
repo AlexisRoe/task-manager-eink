@@ -1,18 +1,11 @@
 import "./week.view.css";
 import { useState } from "react";
-import {
-  DEFAULT_WEEK_PANE,
-  isWeekPane,
-  WEEK_PANES,
-  type WeekPane,
-} from "@/constants/week.constants";
 import { useToggleHabit } from "@/hooks/habits.hook";
 import { useNow } from "@/hooks/now.hook";
-import { useIsPortrait } from "@/hooks/orientation.hook";
 import { useTaskActions } from "@/hooks/task-actions.hook";
 import { useWeekData, useWeekHabitData } from "@/hooks/week.hook";
 import { useUiStore } from "@/store/ui.store";
-import { Segmented, Text, Title } from "@/ui";
+import { Text, Title, Toggle } from "@/ui";
 import { formatDate, isoWeekNumber, todayIso } from "@/utils/date.utils";
 import { WeekColumn, type WeekItem } from "./week-column.component";
 
@@ -25,9 +18,7 @@ export function WeekView() {
   const habitData = useWeekHabitData(date);
   const { toggleDone } = useTaskActions();
   const toggleHabit = useToggleHabit();
-  const portrait = useIsPortrait();
-  const [pane, setPane] = useState<WeekPane>(DEFAULT_WEEK_PANE);
-  const showHabits = portrait && pane === "habits";
+  const [showHabits, setShowHabits] = useState(false);
   const { days, done, total } = showHabits ? habitData : taskData;
   const first = days[0]?.date ?? date;
   const last = days[days.length - 1]?.date ?? date;
@@ -60,27 +51,17 @@ export function WeekView() {
 
   return (
     <div className="week-view">
-      {portrait ? (
-        <Segmented
-          value={pane}
-          onChange={(id) => {
-            if (isWeekPane(id)) setPane(id);
-          }}
-          aria-label="Week content"
-        >
-          {WEEK_PANES.map(({ id, label }) => (
-            <Segmented.Item key={id} id={id}>
-              {label}
-            </Segmented.Item>
-          ))}
-        </Segmented>
-      ) : null}
       <div className="week-view__heading">
         <Title size="1">Week {isoWeekNumber(date)}</Title>
         <Text as="span">{range}</Text>
-        <Text as="span" className="week-view__progress">
-          {done} of {total} done
-        </Text>
+        <div className="week-view__progress">
+          <Text as="span">
+            {done} of {total} done
+          </Text>
+          <Toggle checked={showHabits} onChange={setShowHabits}>
+            Habits
+          </Toggle>
+        </div>
       </div>
       <div className="week-view__columns">
         {days.map((day, index) => (
