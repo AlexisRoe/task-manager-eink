@@ -1,8 +1,9 @@
 import { createStore, get, set } from "idb-keyval";
-import { PERSIST_KEY } from "@/config/storage.config";
+import { PERSIST_KEY, SCHEMA_VERSION } from "@/config/storage.config";
+import { HABITS_MAX_ACTIVE } from "@/constants/habit.constants";
 import { createIdbStorage } from "@/store/idb.storage";
 import { emptyPersistedTasks, migratePersistedTasks } from "@/store/tasks.migrations";
-import { selectDayTasks } from "@/store/tasks.selectors";
+import { selectDayHabits, selectDayTasks } from "@/store/tasks.selectors";
 import { createTasksStore } from "@/store/tasks.store";
 import type { TaskInput } from "@/types/task.types";
 
@@ -145,6 +146,73 @@ describe("tasks store", () => {
     expect(await get(PERSIST_KEY, raw)).toBeDefined();
   });
 
+  it("adds habits up to the active limit and frees a slot on delete", () => {
+    const store = createTasksStore(freshStorage());
+    for (let i = 0; i < HABITS_MAX_ACTIVE; i += 1) {
+      expect(store.getState().addHabit(`Habit ${i}`, "2026-11-19")).toBe(true);
+    }
+    expect(store.getState().addHabit("One too many", "2026-11-19")).toBe(false);
+    expect(store.getState().habits).toHaveLength(HABITS_MAX_ACTIVE);
+    store.getState().deleteHabit(store.getState().habits[0]?.id ?? "", "2026-11-20");
+    expect(store.getState().addHabit("Now fits", "2026-11-20")).toBe(true);
+  });
+
+  it("renames habits and toggles them only within their active range", () => {
+    const store = createTasksStore(freshStorage());
+    store.getState().addHabit("Read", "2026-11-19");
+    const id = store.getState().habits[0]?.id ?? "";
+    store.getState().renameHabit(id, "Read 10 pages");
+    expect(store.getState().habits[0]?.title).toBe("Read 10 pages");
+
+    store.getState().toggleHabit(id, "2026-11-19");
+    expect(selectDayHabits(store.getState(), "2026-11-19")[0]?.done).toBe(true);
+    store.getState().toggleHabit(id, "2026-11-19");
+    expect(selectDayHabits(store.getState(), "2026-11-19")[0]?.done).toBe(false);
+    store.getState().toggleHabit(id, "2026-11-18");
+    store.getState().toggleHabit("missing", "2026-11-19");
+    expect(store.getState().habitChecks).toEqual({});
+  });
+
+  it("ends a habit on delete but keeps its past check-ins", () => {
+    const store = createTasksStore(freshStorage());
+    store.getState().addHabit("Read", "2026-11-19");
+    const id = store.getState().habits[0]?.id ?? "";
+    store.getState().toggleHabit(id, "2026-11-19");
+    store.getState().deleteHabit(id, "2026-11-21");
+    expect(store.getState().habits[0]?.endDate).toBe("2026-11-21");
+    expect(selectDayHabits(store.getState(), "2026-11-19")[0]?.done).toBe(true);
+    expect(selectDayHabits(store.getState(), "2026-11-21")).toHaveLength(0);
+    store.getState().deleteHabit("missing", "2026-11-21");
+  });
+
+  it("removes a habit entirely when deleted on the day it started", () => {
+    const store = createTasksStore(freshStorage());
+    store.getState().addHabit("Read", "2026-11-19");
+    const id = store.getState().habits[0]?.id ?? "";
+    store.getState().toggleHabit(id, "2026-11-19");
+    store.getState().deleteHabit(id, "2026-11-19");
+    expect(store.getState().habits).toHaveLength(0);
+    expect(store.getState().habitChecks).toEqual({});
+  });
+
+  it("upgrades version 1 data and persists habits", async () => {
+    const name = `test-db-${dbCounter++}`;
+    const raw = createStore(name, "state");
+    const v1 = { version: 1, tasks: [], series: [], occurrences: {}, carryDismissedOn: null };
+    await set(PERSIST_KEY, JSON.stringify({ version: 1, state: v1 }), raw);
+    const storage = createIdbStorage(name, "state");
+    const store = createTasksStore(storage);
+    await store.persist.rehydrate();
+    expect(store.getState().recoveredFromCorruption).toBe(false);
+    expect(store.getState().habits).toEqual([]);
+    store.getState().addHabit("Read", "2026-11-19");
+    await new Promise((resolve) => setTimeout(resolve, 20));
+
+    const second = createTasksStore(storage);
+    await second.persist.rehydrate();
+    expect(second.getState().habits.map((h) => h.title)).toEqual(["Read"]);
+  });
+
   it("removes items through the storage adapter", async () => {
     const storage = freshStorage();
     await storage.setItem("k", "v");
@@ -155,8 +223,16 @@ describe("tasks store", () => {
 });
 
 describe("migratePersistedTasks", () => {
+  it("upgrades version 1 data by adding empty habits", () => {
+    const v1 = { version: 1, tasks: [], series: [], occurrences: {}, carryDismissedOn: null };
+    expect(migratePersistedTasks(v1, 1)).toEqual(emptyPersistedTasks());
+    expect(migratePersistedTasks(null, 1)).toBeNull();
+  });
+
   it("accepts current data and rejects unknown versions or invalid shapes", () => {
-    expect(migratePersistedTasks(emptyPersistedTasks(), 1)).toEqual(emptyPersistedTasks());
+    expect(migratePersistedTasks(emptyPersistedTasks(), SCHEMA_VERSION)).toEqual(
+      emptyPersistedTasks(),
+    );
     expect(migratePersistedTasks(emptyPersistedTasks(), 99)).toBeNull();
     expect(migratePersistedTasks(emptyPersistedTasks(), 0)).toBeNull();
     expect(migratePersistedTasks({ nope: true }, 1)).toBeNull();

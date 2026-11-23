@@ -1,11 +1,13 @@
 import { NOTES_MAX_LENGTH, TITLE_MAX_LENGTH } from "@/constants/task.constants";
 import { createId } from "@/utils/id.utils";
 import {
+  isHabit,
   isOccurrenceState,
   isPersistedTasks,
   isSeries,
   isTask,
   type TaskDraft,
+  validateHabitTitle,
   validateTaskDraft,
 } from "@/utils/validate.utils";
 
@@ -31,6 +33,8 @@ const task = {
   project: "Home",
   notes: "",
 };
+
+const habit = { id: "h1", title: "Read", startDate: "2026-11-19", endDate: null };
 
 describe("validateTaskDraft", () => {
   it("normalizes a valid draft", () => {
@@ -101,13 +105,46 @@ describe("persisted guards", () => {
     expect(isOccurrenceState({ done: "yes", skipped: false })).toBe(false);
   });
 
+  it("validates habits", () => {
+    expect(isHabit(habit)).toBe(true);
+    expect(isHabit({ ...habit, endDate: "2026-11-20" })).toBe(true);
+    expect(isHabit({ ...habit, endDate: "2026-11-19" })).toBe(false);
+    expect(isHabit({ ...habit, endDate: "bad" })).toBe(false);
+    expect(isHabit({ ...habit, startDate: "2026-02-31" })).toBe(false);
+    expect(isHabit({ ...habit, title: "" })).toBe(false);
+    expect(isHabit({ ...habit, title: "x".repeat(TITLE_MAX_LENGTH + 1) })).toBe(false);
+    expect(isHabit({ ...habit, id: 1 })).toBe(false);
+    expect(isHabit(null)).toBe(false);
+  });
+
   it("validates the persisted root", () => {
-    const root = { version: 1, tasks: [task], series: [], occurrences: {}, carryDismissedOn: null };
+    const root = {
+      version: 2,
+      tasks: [task],
+      series: [],
+      occurrences: {},
+      carryDismissedOn: null,
+      habits: [habit],
+      habitChecks: { "h1:2026-11-19": true },
+    };
     expect(isPersistedTasks(root)).toBe(true);
     expect(isPersistedTasks({ ...root, tasks: [{ ...task, id: 1 }] })).toBe(false);
     expect(isPersistedTasks({ ...root, occurrences: { a: 1 } })).toBe(false);
     expect(isPersistedTasks({ ...root, carryDismissedOn: "x" })).toBe(false);
+    expect(isPersistedTasks({ ...root, habits: [{ ...habit, title: 3 }] })).toBe(false);
+    expect(isPersistedTasks({ ...root, habitChecks: { a: false } })).toBe(false);
+    expect(isPersistedTasks({ ...root, habitChecks: [] })).toBe(false);
+    const { habits: _habits, habitChecks: _checks, ...v1 } = root;
+    expect(isPersistedTasks(v1)).toBe(false);
     expect(isPersistedTasks("nope")).toBe(false);
+  });
+});
+
+describe("validateHabitTitle", () => {
+  it("trims, requires and length-limits the title", () => {
+    expect(validateHabitTitle("  Read  ")).toEqual({ ok: true, value: "Read" });
+    expect(validateHabitTitle("   ")).toEqual({ ok: false, error: "Title is required" });
+    expect(validateHabitTitle("x".repeat(TITLE_MAX_LENGTH + 1)).ok).toBe(false);
   });
 });
 

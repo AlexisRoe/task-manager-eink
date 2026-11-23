@@ -3,7 +3,7 @@ import { App } from "@/app/app.component";
 import { selectDayStats } from "@/store/tasks.selectors";
 import { useTasksStore } from "@/store/tasks.store";
 import { resetUiStore, useUiStore } from "@/store/ui.store";
-import { makeSeries, makeTask, seedTasks } from "@/test/fixtures.utils";
+import { makeHabit, makeSeries, makeTask, seedTasks } from "@/test/fixtures.utils";
 import { startOfWeek, todayIso } from "@/utils/date.utils";
 
 const today = todayIso();
@@ -46,5 +46,14 @@ describe("Week view", () => {
     render(<App />);
     fireEvent.click((await screen.findAllByRole("button", { name: /^Open / }))[2] as HTMLElement);
     expect(useUiStore.getState().view).toBe("day");
+  });
+});
+
+describe("Week view habits", () => {
+  it("never shows habits", async () => {
+    seedTasks({ habits: [makeHabit({ id: "h", title: "Stretch", startDate: monday })] });
+    render(<App />);
+    await screen.findByRole("heading", { name: /^Week/ });
+    expect(screen.queryByText("Stretch")).not.toBeInTheDocument();
   });
 });

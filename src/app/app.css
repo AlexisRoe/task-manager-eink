@@ -46,6 +46,11 @@ body {
   justify-content: flex-end;
 }
 
+.app-header__actions {
+  display: flex;
+  gap: var(--eink-size-8);
+}
+
 @media (orientation: portrait) {
   .app {
     padding: var(--eink-size-16);

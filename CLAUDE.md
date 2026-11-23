@@ -3,7 +3,7 @@
 Guidance for Claude Code in this repository.
 
 ## Purpose
-"Daybook" — a standalone-only PWA (landscape and portrait) task planner for e-ink tablets. All data is stored locally (IndexedDB); the app makes no network requests. Source of truth for intent: `CONCEPT.md`; implementation roadmap: `PLAN.md`; design reference: `prototype/` and `screenshots/`.
+"Daybook" — a standalone-only PWA (landscape and portrait) task planner for e-ink tablets. All data is stored locally (IndexedDB); the app makes no network requests. Product overview: `README.md`; implementation roadmap: `PLAN.md`; design reference: `prototype/` and `screenshots/`.
 
 ## Commands
 - `npm run dev` / `npm run build` / `npm run preview`

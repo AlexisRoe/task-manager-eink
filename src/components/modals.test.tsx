@@ -1,10 +1,11 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { App } from "@/app/app.component";
+import { HABITS_MAX_ACTIVE } from "@/constants/habit.constants";
 import { TITLE_MAX_LENGTH } from "@/constants/task.constants";
 import { selectDayTasks } from "@/store/tasks.selectors";
 import { useTasksStore } from "@/store/tasks.store";
 import { resetUiStore, useUiStore } from "@/store/ui.store";
-import { makeSeries, makeTask, seedTasks } from "@/test/fixtures.utils";
+import { makeHabit, makeSeries, makeTask, seedTasks } from "@/test/fixtures.utils";
 import { addDays, todayIso } from "@/utils/date.utils";
 
 const today = todayIso();
@@ -130,5 +131,89 @@ describe("Edit task modal", () => {
       done: true,
     });
     expect(useUiStore.getState().modal).toEqual({ kind: "none" });
+  });
+});
+
+describe("Habit modals", () => {
+  const openNewHabit = async () => {
+    render(<App />);
+    fireEvent.click(await screen.findByRole("button", { name: /New habit/ }));
+  };
+
+  it("requires a title and creates a habit starting today", async () => {
+    await openNewHabit();
+    expect(await screen.findByText("0 of 7 habits active")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Add habit" }));
+    expect(await screen.findByText("Title is required")).toBeInTheDocument();
+    fireEvent.change(screen.getByRole("textbox", { name: /Title/ }), {
+      target: { value: "  Stretch " },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Add habit" }));
+    expect(useTasksStore.getState().habits[0]).toMatchObject({
+      title: "Stretch",
+      startDate: today,
+      endDate: null,
+    });
+    expect(useUiStore.getState().modal).toEqual({ kind: "none" });
+  });
+
+  it("disables New habit once the maximum is active", async () => {
+    seedTasks({
+      habits: Array.from({ length: HABITS_MAX_ACTIVE }, (_, i) =>
+        makeHabit({ id: `h${i}`, title: `Habit ${i}` }),
+      ),
+    });
+    render(<App />);
+    expect(await screen.findByRole("button", { name: /New habit/ })).toBeDisabled();
+  });
+
+  it("refuses to add beyond the maximum when opened anyway", async () => {
+    seedTasks({
+      habits: Array.from({ length: HABITS_MAX_ACTIVE }, (_, i) =>
+        makeHabit({ id: `h${i}`, title: `Habit ${i}` }),
+      ),
+    });
+    useUiStore.setState({ modal: { kind: "new-habit" } });
+    render(<App />);
+    fireEvent.change(await screen.findByRole("textbox", { name: /Title/ }), {
+      target: { value: "Eighth" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Add habit" }));
+    expect(await screen.findByText(/already have 7 active habits/)).toBeInTheDocument();
+    expect(useTasksStore.getState().habits).toHaveLength(HABITS_MAX_ACTIVE);
+  });
+
+  it("renames a habit", async () => {
+    seedTasks({ habits: [makeHabit({ id: "h", title: "Read" })] });
+    useUiStore.setState({ modal: { kind: "edit-habit", id: "h" } });
+    render(<App />);
+    const input = await screen.findByRole("textbox", { name: /Title/ });
+    expect(input).toHaveValue("Read");
+    fireEvent.change(input, { target: { value: "Read 10 pages" } });
+    fireEvent.click(screen.getByRole("button", { name: "Save" }));
+    expect(useTasksStore.getState().habits[0]?.title).toBe("Read 10 pages");
+  });
+
+  it("deletes a habit but keeps its past check-ins", async () => {
+    const start = addDays(today, -3);
+    seedTasks({
+      habits: [makeHabit({ id: "h", title: "Read", startDate: start })],
+      habitChecks: { [`h:${start}`]: true },
+    });
+    useUiStore.setState({ modal: { kind: "delete-habit", id: "h" } });
+    render(<App />);
+    expect(await screen.findByText(/past check-ins stay in History/)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Delete" }));
+    expect(useTasksStore.getState().habits[0]?.endDate).toBe(today);
+    expect(useTasksStore.getState().habitChecks).toEqual({ [`h:${start}`]: true });
+  });
+
+  it("renders nothing for an unknown habit", async () => {
+    useUiStore.setState({ modal: { kind: "edit-habit", id: "missing" } });
+    render(<App />);
+    await screen.findByRole("button", { name: /New habit/ });
+    expect(screen.queryByRole("textbox", { name: /Title/ })).not.toBeInTheDocument();
+    useUiStore.setState({ modal: { kind: "delete-habit", id: "missing" } });
+    expect(screen.queryByText(/past check-ins/)).not.toBeInTheDocument();
   });
 });

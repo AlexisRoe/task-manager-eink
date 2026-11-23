@@ -9,6 +9,7 @@ import {
 } from "@/config/app.config";
 import { DAY_PANES, type DayPane, DEFAULT_DAY_PANE, isDayPane } from "@/constants/day.constants";
 import { useDayData } from "@/hooks/day.hook";
+import { useDayHabits, useToggleHabit } from "@/hooks/habits.hook";
 import { useNow } from "@/hooks/now.hook";
 import { useIsPortrait } from "@/hooks/orientation.hook";
 import { rowKey, useTaskActions } from "@/hooks/task-actions.hook";
@@ -20,9 +21,10 @@ import { Pill, Segmented, Text, TimeGrid, type TimeGridItem, Title } from "@/ui"
 import { formatFullDate, formatWeekdayLong, todayIso } from "@/utils/date.utils";
 import { minutesOfDay, toMinutes } from "@/utils/time.utils";
 import { CarryOverBanner } from "./carry-over-banner.component";
+import { HabitList } from "./habit-list.component";
 import { TaskList } from "./task-list.component";
 
-/** The Day view: header with progress, hour timeline and the scheduled / anytime task lists. */
+/** The Day view: header with task progress, hour timeline, the day's habits and the scheduled / anytime task lists. */
 export function DayView() {
   const date = useUiStore((state) => state.date);
   const openRow = useUiStore((state) => state.openRow);
@@ -31,6 +33,9 @@ export function DayView() {
   const today = todayIso(now);
   const { scheduled, anytime, done, total } = useDayData(date);
   const actions = useTaskActions();
+  const dayHabits = useDayHabits(date);
+  const toggleHabit = useToggleHabit();
+  const openModal = useUiStore((state) => state.openModal);
   const portrait = useIsPortrait();
   const [pane, setPane] = useState<DayPane>(DEFAULT_DAY_PANE);
   const showTimeline = !portrait || pane === "timeline";
@@ -115,6 +120,18 @@ export function DayView() {
                 count={carryCount}
                 onMove={() => carryOverToToday(today)}
                 onLeave={() => dismissCarryOver(today)}
+              />
+            ) : null}
+            {dayHabits.total > 0 ? (
+              <HabitList
+                habits={dayHabits.habits}
+                done={dayHabits.done}
+                checkable={date <= today}
+                openRow={openRow}
+                onToggleRow={toggleRow}
+                onToggleDone={toggleHabit}
+                onEdit={(habit) => openModal({ kind: "edit-habit", id: habit.id })}
+                onDelete={(habit) => openModal({ kind: "delete-habit", id: habit.id })}
               />
             ) : null}
             <TaskList

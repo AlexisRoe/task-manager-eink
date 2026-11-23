@@ -8,6 +8,7 @@ import {
   TITLE_MAX_LENGTH,
 } from "@/constants/task.constants";
 import type {
+  Habit,
   OccurrenceState,
   PersistedTasks,
   RecurringSeries,
@@ -132,11 +133,41 @@ export function isOccurrenceState(value: unknown): value is OccurrenceState {
   return isRecord(value) && typeof value.done === "boolean" && typeof value.skipped === "boolean";
 }
 
+/** Result of validating a habit title: either the clean title or an error message. */
+export type HabitTitleResult = { ok: true; value: string } | { ok: false; error: string };
+
+/** Validates and normalizes a habit title so only safe, bounded data reaches the store. */
+export function validateHabitTitle(raw: string): HabitTitleResult {
+  const title = raw.trim();
+  if (title.length === 0) return { ok: false, error: "Title is required" };
+  if (title.length > TITLE_MAX_LENGTH)
+    return { ok: false, error: `Title must be at most ${TITLE_MAX_LENGTH} characters` };
+  return { ok: true, value: title };
+}
+
+/** Type guard for a persisted habit. */
+export function isHabit(value: unknown): value is Habit {
+  return (
+    isRecord(value) &&
+    typeof value.id === "string" &&
+    typeof value.title === "string" &&
+    value.title.length > 0 &&
+    value.title.length <= TITLE_MAX_LENGTH &&
+    isIsoDate(value.startDate) &&
+    (value.endDate === null ||
+      (isIsoDate(value.endDate) && value.endDate > (value.startDate as string)))
+  );
+}
+
 /** Type guard for the whole persisted root; rejects anything that does not match the schema. */
 export function isPersistedTasks(value: unknown): value is PersistedTasks {
   if (!isRecord(value)) return false;
-  const { version, tasks, series, occurrences, carryDismissedOn } = value;
+  const { version, tasks, series, occurrences, carryDismissedOn, habits, habitChecks } = value;
   return (
+    Array.isArray(habits) &&
+    habits.every(isHabit) &&
+    isRecord(habitChecks) &&
+    Object.values(habitChecks).every((check) => check === true) &&
     typeof version === "number" &&
     Array.isArray(tasks) &&
     tasks.every(isTask) &&

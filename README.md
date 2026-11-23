@@ -2,9 +2,9 @@
 
 **A calm, private day planner for e-ink tablets.**
 
-Daybook is a standalone-only Progressive Web App (landscape and portrait) for planning your day, your week and looking back at your habits. It is built for the constraints of e-ink screens: high contrast, no animations, no colour, large touch targets.
+Daybook is a standalone-only Progressive Web App (landscape and portrait) for planning your day and your week, keeping up daily habits and looking back at your progress. It is built for the constraints of e-ink screens: high contrast, no animations, no colour, large touch targets.
 
-Everything stays on your device. Tasks live in IndexedDB, the app makes **no network requests** after it is installed, and there is no account, analytics or telemetry.
+Everything stays on your device. Tasks and habits live in IndexedDB, the app makes **no network requests** after it is installed, and there is no account, analytics or telemetry.
 
 This application was **reimplemented from a design prototype with security-by-design principles**: security requirements shaped the architecture, tooling and pipeline from the first commit instead of being added afterwards. See [Security by design](#security-by-design).
 
@@ -20,9 +20,10 @@ This application was **reimplemented from a design prototype with security-by-de
 
 ## Features
 
-- **Day view**: hour timeline with a live "now" marker, scheduled and "Anytime" lists, expandable rows with notes, move-to-tomorrow and delete.
-- **Week view**: Monday to Sunday columns with per-day progress, today highlighted, tap a day to open it.
-- **History view**: 18-week completion heatmap, current streak, tasks done in the last 30 days, average completion and a drill-down into any day.
+- **Day view**: hour timeline with a live "now" marker, the day's habits, scheduled and "Anytime" lists, expandable rows with notes, edit, move-to-tomorrow and delete. In portrait it shows one pane at a time and opens on the list.
+- **Week view**: Monday to Sunday columns with per-day progress, today highlighted, tap a day to open it. Habits are not shown here.
+- **History view**: 18-week completion heatmaps for tasks and for habits, plus a drill-down into any day where tasks and habits can still be checked off.
+- **Daily habits**: up to 7 active habits with just a title, no time, done at any point of the day. Check them off today or on past days, rename or delete them; deleting stops a habit from today on and keeps its past check-ins.
 - **Recurring tasks**: daily, weekdays or weekly, with "only this day" or "this and all future days" deletion.
 - **Carry-over**: offers to move yesterday's unfinished tasks to today.
 - **Offline-first PWA**: installable, precached, with an update prompt.
@@ -84,19 +85,19 @@ flowchart TD
     Day[Day view]
     Week[Week view]
     History[History view]
-    Modals[New task / Delete recurring]
+    Modals[New / edit task, habit<br/>delete recurring / habit]
   end
 
   UI["ui/index.ts<br/>(only UI import point)"]
   Lib[e-ink-ui-lib]
 
-  Hooks["hooks/<br/>day, week, history, actions"]
-  Sel["store/tasks.selectors.ts<br/>materialize recurring occurrences"]
+  Hooks["hooks/<br/>day, week, history, habits, actions"]
+  Sel["store/tasks.selectors.ts<br/>materialize occurrences and habits"]
   Tasks["store/tasks.store.ts<br/>zustand + persist"]
   Ui["store/ui.store.ts<br/>view, date, open row, modal<br/>(not persisted)"]
   Idb[("IndexedDB<br/>via idb.storage.ts")]
   Mig["tasks.migrations.ts<br/>validate and migrate on load"]
-  Utils["utils/<br/>date, time, recurrence,<br/>history, validate"]
+  Utils["utils/<br/>date, time, recurrence, habit,<br/>history, validate"]
   Cfg["config/ and constants/"]
 
   Views --> UI
@@ -113,13 +114,14 @@ flowchart TD
   Utils --> Cfg
 ```
 
-- **State:** tasks are persisted to IndexedDB; transient UI state is kept separately and never persisted.
+- **State:** tasks and habits are persisted to IndexedDB; transient UI state is kept separately and never persisted.
 - **Recurrence:** recurring tasks are stored as a series plus per-date occurrence state and materialized per day in the selectors; generated occurrences are never stored.
+- **Habits:** stored apart from tasks as a habit (active from its start date until it is deleted) plus the dates it was done, so they never mix into task lists, the Week view or task statistics. The limit of 7 active habits is enforced in the store ([ADR 0017](docs/decisions/0017-daily-habits.md)).
 - **Dates:** local `YYYY-MM-DD` strings and `HH:MM` times handled by pure utilities, no date library.
 - **UI:** components come only from `e-ink-ui-lib` through `src/ui/index.ts`. Missing components are built as candidates in `src/ui/candidates/` (none at the moment) and contributed upstream. App CSS is layout only.
 - **PWA:** `vite-plugin-pwa` generates the service worker and manifest; `public/_headers` carries the CSP and security headers.
 
-More background lives in `CONCEPT.md` (intent), `PLAN.md` (roadmap), `CLAUDE.md` (conventions) and `docs/decisions/` (ADRs).
+More background lives in `PLAN.md` (roadmap), `CLAUDE.md` (conventions) and `docs/decisions/` (ADRs).
 
 ## Security by design
 
@@ -130,7 +132,7 @@ The original prototype loaded web fonts from Google, kept state in memory and ha
 | **Data locality** | All data is stored in IndexedDB on the device. No network calls, telemetry, CDNs or third-party origins; fonts and assets are self-hosted. |
 | **Content-Security-Policy** | `public/_headers` sets `default-src 'self'`, no inline scripts or styles, `object-src 'none'`, `frame-ancestors 'none'`, `require-trusted-types-for 'script'`, plus `Permissions-Policy` (deny all), `Referrer-Policy: no-referrer`, `nosniff`, COOP and HSTS. The policy is never loosened to make something work; for example the UI library's inline base64 fonts are extracted at build time instead of allowing `data:` fonts. |
 | **Untrusted persisted data** | Stored data is validated with type guards on load, schema changes need a versioned migration, and corrupt data is reset with an in-app notice instead of crashing. |
-| **Input handling** | Every user input is trimmed, validated and length-limited (title 120, notes 1000 characters, `HH:MM` times, enumerated values). User text is only rendered as React text; `dangerouslySetInnerHTML`, `eval` and `new Function` are not used. IDs come from `crypto.randomUUID()`. |
+| **Input handling** | Every user input is trimmed, validated and length-limited (task and habit titles 120, notes 1000 characters, `HH:MM` times, enumerated values). User text is only rendered as React text; `dangerouslySetInnerHTML`, `eval` and `new Function` are not used. IDs come from `crypto.randomUUID()`. |
 | **Dependencies** | Five runtime dependencies, exact versions pinned, lockfile committed, installs via `npm ci`, `ignore-scripts=true`, `engine-strict`. Each dependency is justified in an ADR. |
 | **Supply-chain checks** | `npm run security` runs `npm audit` (fails on high severity) and verifies registry signatures; Dependabot updates npm packages and GitHub Actions weekly. |
 | **CI/CD** | GitHub Actions are pinned to commit SHAs with least-privilege `permissions`, no persisted checkout credentials, dependency review, gitleaks secret scanning and CodeQL on every PR. Deployment runs only from `main` in a protected `production` environment with a project-scoped token. |

@@ -3,7 +3,7 @@ import { App } from "@/app/app.component";
 import { PORTRAIT_QUERY } from "@/config/pwa.config";
 import { useTasksStore } from "@/store/tasks.store";
 import { resetUiStore, useUiStore } from "@/store/ui.store";
-import { makeTask, seedTasks } from "@/test/fixtures.utils";
+import { makeHabit, makeTask, seedTasks } from "@/test/fixtures.utils";
 import { stubMatchMedia } from "@/test/match-media.utils";
 import { addDays, formatFullDate, todayIso } from "@/utils/date.utils";
 
@@ -25,12 +25,14 @@ beforeEach(() => {
 });
 
 describe("History view", () => {
-  it("shows the headline statistics", async () => {
+  it("shows the task and habit heatmaps without statistics", async () => {
     render(<App />);
-    expect(await screen.findByText("Current streak, 75% or more done")).toBeInTheDocument();
-    expect(screen.getByText("Tasks done in the last 30 days")).toBeInTheDocument();
-    expect(screen.getByText("Average completion, 18 weeks")).toBeInTheDocument();
-    expect(screen.getAllByText("2")).toHaveLength(2);
+    expect(
+      await screen.findByLabelText("Task completion of the last 18 weeks"),
+    ).toBeInTheDocument();
+    expect(screen.getByLabelText("Habit completion of the last 18 weeks")).toBeInTheDocument();
+    expect(screen.queryByText(/Current streak/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Average completion/)).not.toBeInTheDocument();
   });
 
   it("selects a day from the heatmap and lists its tasks", async () => {
@@ -59,13 +61,15 @@ describe("History view", () => {
   it("shows one pane at a time in portrait and opens the day on selection", async () => {
     stubMatchMedia((query) => query === PORTRAIT_QUERY);
     render(<App />);
-    expect(await screen.findByText("Current streak, 75% or more done")).toBeInTheDocument();
+    expect(
+      await screen.findByLabelText("Task completion of the last 18 weeks"),
+    ).toBeInTheDocument();
     expect(screen.queryByText("SELECTED DAY")).not.toBeInTheDocument();
     const toggle = within(screen.getByLabelText("History layout"));
     fireEvent.click(toggle.getByRole("button", { name: "Day" }));
     expect(screen.getByText("SELECTED DAY")).toBeInTheDocument();
-    expect(screen.queryByText("Current streak, 75% or more done")).not.toBeInTheDocument();
-    fireEvent.click(toggle.getByRole("button", { name: "Statistics" }));
+    expect(screen.queryByLabelText("Task completion of the last 18 weeks")).not.toBeInTheDocument();
+    fireEvent.click(toggle.getByRole("button", { name: "Heatmaps" }));
     const yesterday = addDays(today, -1);
     const cell = screen
       .getAllByRole("button", { pressed: false })
@@ -83,5 +87,32 @@ describe("History view", () => {
       .getAllByRole("button")
       .map((button) => button.getAttribute("aria-label") ?? "");
     expect(labels.some((label) => label.includes(addDays(today, 8)))).toBe(false);
+  });
+});
+
+describe("History view habits", () => {
+  it("shows a separate habit heatmap and toggles habits of the selected day", async () => {
+    const yesterday = addDays(today, -1);
+    seedTasks({
+      habits: [makeHabit({ id: "h", title: "Stretch", startDate: yesterday })],
+      habitChecks: { [`h:${yesterday}`]: true },
+    });
+    render(<App />);
+    expect(
+      await screen.findByLabelText("Task completion of the last 18 weeks"),
+    ).toBeInTheDocument();
+    expect(screen.getByLabelText("Habit completion of the last 18 weeks")).toBeInTheDocument();
+    const cell = screen
+      .getAllByRole("button")
+      .find((button) =>
+        button
+          .getAttribute("aria-label")
+          ?.endsWith(`${formatFullDate(yesterday)}: 1 of 1 habits done`),
+      );
+    expect(cell).toBeDefined();
+    expect(screen.getByText("0 of 1 habits")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("checkbox", { name: 'Mark habit "Stretch" as done' }));
+    expect(useTasksStore.getState().habitChecks[`h:${today}`]).toBe(true);
+    expect(screen.getByText("1 of 1 habits")).toBeInTheDocument();
   });
 });

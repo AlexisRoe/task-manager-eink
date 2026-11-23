@@ -73,6 +73,24 @@ export interface DayTask extends TaskInput {
   rule: SeriesRule | null;
 }
 
+/** A daily habit: a titled check-off without a time, active on every date from `startDate` until `endDate`. */
+export interface Habit {
+  id: string;
+  title: string;
+  /** First date (inclusive) on which the habit is active. */
+  startDate: IsoDate;
+  /** Date (exclusive) from which the habit is no longer active, or `null` while it is still running. */
+  endDate: IsoDate | null;
+}
+
+/** Habit as the UI sees it on a given day. */
+export interface DayHabit {
+  id: string;
+  title: string;
+  date: IsoDate;
+  done: boolean;
+}
+
 /** Root of the persisted task state. */
 export interface PersistedTasks {
   version: number;
@@ -80,4 +98,7 @@ export interface PersistedTasks {
   series: RecurringSeries[];
   occurrences: Record<string, OccurrenceState>;
   carryDismissedOn: IsoDate | null;
+  habits: Habit[];
+  /** Dates on which a habit was done, keyed `habitId:date`; absent keys mean not done. */
+  habitChecks: Record<string, true>;
 }

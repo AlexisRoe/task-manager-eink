@@ -8,4 +8,4 @@ export const IDB_STORE_NAME = "state";
 export const PERSIST_KEY = "daybook-tasks";
 
 /** Current persisted schema version; bump together with a migration. */
-export const SCHEMA_VERSION = 1;
+export const SCHEMA_VERSION = 2;
