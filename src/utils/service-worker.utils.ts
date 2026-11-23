@@ -2,6 +2,7 @@ import {
   SERVICE_WORKER_POLICY,
   SERVICE_WORKER_URL,
   UPDATE_CHECK_INTERVAL_MS,
+  UPDATE_SETTLE_MS,
 } from "@/config/pwa.config";
 
 interface ScriptUrlPolicy {
@@ -52,5 +53,29 @@ export async function registerServiceWorker(): Promise<void> {
     setInterval(checkForUpdate, UPDATE_CHECK_INTERVAL_MS);
   } catch {
     // Offline support is best-effort; the app keeps working online without it.
+  }
+}
+
+/** Outcome of a manual update check. */
+export type UpdateCheckResult = "installing" | "current" | "offline" | "unsupported";
+
+/**
+ * Asks the server for a newer version on demand. When one exists it installs and activates by
+ * itself and the page reloads (see {@link registerServiceWorker}); `installing` means that is
+ * under way.
+ */
+export async function checkForUpdate(): Promise<UpdateCheckResult> {
+  if (!("serviceWorker" in navigator)) return "unsupported";
+  if (!navigator.onLine) return "offline";
+  try {
+    const registration = await navigator.serviceWorker.getRegistration();
+    if (registration === undefined) return "unsupported";
+    await registration.update();
+    await new Promise((resolve) => setTimeout(resolve, UPDATE_SETTLE_MS));
+    return registration.installing !== null || registration.waiting !== null
+      ? "installing"
+      : "current";
+  } catch {
+    return "offline";
   }
 }

@@ -1,9 +1,10 @@
 import { DateNav } from "@/components/date-nav.component";
+import { APP_NAME } from "@/config/build.config";
 import { HABITS_MAX_ACTIVE } from "@/constants/habit.constants";
 import { useActiveHabitCount } from "@/hooks/habits.hook";
 import { useUiStore } from "@/store/ui.store";
 import type { ViewName } from "@/types/view.types";
-import { Button, Segmented, Title } from "@/ui";
+import { Button, Segmented } from "@/ui";
 
 const VIEWS: readonly { id: ViewName; label: string }[] = [
   { id: "day", label: "Day" },
@@ -23,7 +24,13 @@ export function AppHeader() {
 
   return (
     <header className="app-header">
-      <Title size="3">Daybook</Title>
+      <Button.Naked
+        size="xl"
+        aria-label={`About ${APP_NAME}`}
+        onClick={() => openModal({ kind: "about" })}
+      >
+        {APP_NAME}
+      </Button.Naked>
       <Segmented
         value={view}
         onChange={(id) => {

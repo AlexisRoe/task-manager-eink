@@ -1,6 +1,10 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { SERVICE_WORKER_URL, UPDATE_CHECK_INTERVAL_MS } from "@/config/pwa.config";
-import { registerServiceWorker } from "./service-worker.utils";
+import {
+  SERVICE_WORKER_URL,
+  UPDATE_CHECK_INTERVAL_MS,
+  UPDATE_SETTLE_MS,
+} from "@/config/pwa.config";
+import { checkForUpdate, registerServiceWorker } from "./service-worker.utils";
 
 function stubServiceWorker(update: () => Promise<void>) {
   const register = vi.fn().mockResolvedValue({ update });
@@ -49,5 +53,52 @@ describe("registerServiceWorker", () => {
       },
     });
     await expect(registerServiceWorker()).resolves.toBeUndefined();
+  });
+});
+
+describe("checkForUpdate", () => {
+  afterEach(() => {
+    vi.useRealTimers();
+    vi.unstubAllGlobals();
+  });
+
+  function stubRegistration(registration: object | undefined, onLine = true) {
+    vi.stubGlobal("navigator", {
+      onLine,
+      serviceWorker: { getRegistration: vi.fn().mockResolvedValue(registration) },
+    });
+  }
+
+  it("reports a new version that starts installing", async () => {
+    vi.useFakeTimers();
+    stubRegistration({
+      update: vi.fn().mockResolvedValue(undefined),
+      installing: {},
+      waiting: null,
+    });
+    const result = checkForUpdate();
+    await vi.advanceTimersByTimeAsync(UPDATE_SETTLE_MS);
+    await expect(result).resolves.toBe("installing");
+  });
+
+  it("reports the current version when nothing new is found", async () => {
+    vi.useFakeTimers();
+    stubRegistration({
+      update: vi.fn().mockResolvedValue(undefined),
+      installing: null,
+      waiting: null,
+    });
+    const result = checkForUpdate();
+    await vi.advanceTimersByTimeAsync(UPDATE_SETTLE_MS);
+    await expect(result).resolves.toBe("current");
+  });
+
+  it("reports offline and unsupported states", async () => {
+    stubRegistration({}, false);
+    await expect(checkForUpdate()).resolves.toBe("offline");
+    stubRegistration(undefined);
+    await expect(checkForUpdate()).resolves.toBe("unsupported");
+    vi.stubGlobal("navigator", {});
+    await expect(checkForUpdate()).resolves.toBe("unsupported");
   });
 });

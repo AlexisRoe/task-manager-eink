@@ -4,6 +4,7 @@ export type ViewName = "day" | "week" | "history" | "stats";
 /** Modal currently shown over the app. */
 export type ModalState =
   | { kind: "none" }
+  | { kind: "about" }
   | { kind: "new-task" }
   | { kind: "edit-task"; source: "task" | "series"; id: string }
   | { kind: "delete-recurring"; seriesId: string; date: string }

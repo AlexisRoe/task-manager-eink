@@ -1,3 +1,4 @@
+import { AboutModal } from "@/components/about-modal.component";
 import { DeleteHabitModal } from "@/components/delete-habit-modal.component";
 import { DeleteRecurringModal } from "@/components/delete-recurring-modal.component";
 import { HabitModal } from "@/components/habit-modal.component";
@@ -17,6 +18,8 @@ export function ModalHost() {
   const habits = useTasksStore((state) => state.habits);
 
   switch (modal.kind) {
+    case "about":
+      return <AboutModal onClose={close} />;
     case "new-task":
       return <NewTaskModal date={view === "history" ? todayIso() : date} onClose={close} />;
     case "edit-task": {

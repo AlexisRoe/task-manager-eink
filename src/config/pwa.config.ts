@@ -15,3 +15,6 @@ export const SERVICE_WORKER_POLICY = "daybook-service-worker";
 
 /** How often a running app asks the server whether a newer version exists. */
 export const UPDATE_CHECK_INTERVAL_MS = 60 * 60 * 1000;
+
+/** How long the update check waits for the new worker to start installing, in milliseconds. */
+export const UPDATE_SETTLE_MS = 1500;
