@@ -5,4 +5,5 @@ export type ViewName = "day" | "week" | "history";
 export type ModalState =
   | { kind: "none" }
   | { kind: "new-task" }
+  | { kind: "edit-task"; source: "task" | "series"; id: string }
   | { kind: "delete-recurring"; seriesId: string; date: string };
