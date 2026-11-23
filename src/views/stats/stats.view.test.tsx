@@ -40,7 +40,7 @@ describe("Stats view", () => {
     render(<App />);
     expect(await screen.findByLabelText("Habit streaks")).toBeInTheDocument();
     expect(screen.queryByLabelText("Weekly trend")).not.toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Tasks" }));
+    fireEvent.click(screen.getByRole("switch", { name: "Habits" }));
     expect(screen.getByLabelText("Weekly trend")).toBeInTheDocument();
     expect(screen.queryByLabelText("Habit streaks")).not.toBeInTheDocument();
   });

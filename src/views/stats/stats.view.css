@@ -18,6 +18,12 @@
   margin: 0;
 }
 
+.stats-view__toggle {
+  display: flex;
+  align-items: center;
+  margin-left: auto;
+}
+
 .stats-view__headline {
   grid-column: 1 / -1;
   display: flex;
@@ -48,7 +54,7 @@
 @media (orientation: portrait) {
   .stats-view {
     grid-template-columns: 1fr;
-    grid-template-rows: auto auto auto minmax(0, 1fr);
+    grid-template-rows: auto auto minmax(0, 1fr);
     gap: var(--eink-size-16);
   }
 

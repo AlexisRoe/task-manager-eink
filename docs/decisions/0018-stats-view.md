@@ -10,7 +10,7 @@ History looks back at single days (heatmaps and a drill-down), but nothing shows
 - **Content:** a headline row (completion rate of the last 30 days, tasks done this week, best current habit streak), a habit table (current streak, longest streak, 30-day rate, and an "Always" / "Never" flag), and charts for tasks per week (12 weeks, with a trend against the previous week), completion by weekday, by project and by priority.
 - **Pure derivation.** All numbers come from `utils/stats.utils.ts` and are assembled in `hooks/stats.hook.ts` from the existing selectors. Nothing new is stored, so there is no schema change. Tunables are in `config/stats.config.ts`.
 - **Habits** are exact, since every check-in is stored per date. An unchecked *today* neither breaks a streak nor counts against the rate. The "Always" / "Never" flags need at least 7 active days in the window.
-- **Layout:** landscape shows habits on the left and charts on the right. Portrait keeps the headline row and splits the rest into a Habits / Tasks pane switch, like History.
+- **Layout:** landscape shows habits on the left and charts on the right. Portrait keeps the headline row and splits the rest into habits and tasks, switched with a "Habits" `Toggle` at the end of the heading line (on = habits, the default; off = tasks).
 - No new dependency; charts, table, pill and value are lib components.
 
 ## Consequences

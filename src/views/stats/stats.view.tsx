@@ -1,14 +1,7 @@
 import "./stats.view.css";
 import { useState } from "react";
 import { STATS_WEEKS, STATS_WINDOW_DAYS } from "@/config/stats.config";
-import {
-  DEFAULT_STATS_PANE,
-  isStatsPane,
-  PRIORITY_LABELS,
-  STATS_PANES,
-  type StatsPane,
-  WEEKDAY_LABELS,
-} from "@/constants/stats.constants";
+import { PRIORITY_LABELS, WEEKDAY_LABELS } from "@/constants/stats.constants";
 import { PROJECTS } from "@/constants/task.constants";
 import { useNow } from "@/hooks/now.hook";
 import { useIsPortrait } from "@/hooks/orientation.hook";
@@ -19,10 +12,10 @@ import {
   Label,
   Pill,
   ProgressBar,
-  Segmented,
   Table,
   Text,
   Title,
+  Toggle,
   Trend,
   Value,
 } from "@/ui";
@@ -34,9 +27,9 @@ export function StatsView() {
   const today = todayIso(useNow());
   const stats = useStatsData(today);
   const portrait = useIsPortrait();
-  const [pane, setPane] = useState<StatsPane>(DEFAULT_STATS_PANE);
-  const showHabits = !portrait || pane === "habits";
-  const showTasks = !portrait || pane === "tasks";
+  const [habitsOnly, setHabitsOnly] = useState(true);
+  const showHabits = !portrait || habitsOnly;
+  const showTasks = !portrait || !habitsOnly;
 
   const [previous, latest] = stats.weekly.slice(-2);
   const trend =
@@ -57,6 +50,13 @@ export function StatsView() {
       <div className="stats-view__heading">
         <Title size="1">Stats</Title>
         <Text as="span">Last {STATS_WINDOW_DAYS} days</Text>
+        {portrait ? (
+          <div className="stats-view__toggle">
+            <Toggle checked={habitsOnly} onChange={setHabitsOnly}>
+              Habits
+            </Toggle>
+          </div>
+        ) : null}
       </div>
       <section className="stats-view__headline" aria-label="Overview">
         <div>
@@ -78,22 +78,6 @@ export function StatsView() {
           </Value>
         </div>
       </section>
-      {portrait ? (
-        <Segmented
-          className="stats-view__panes"
-          value={pane}
-          onChange={(id) => {
-            if (isStatsPane(id)) setPane(id);
-          }}
-          aria-label="Stats layout"
-        >
-          {STATS_PANES.map(({ id, label }) => (
-            <Segmented.Item key={id} id={id}>
-              {label}
-            </Segmented.Item>
-          ))}
-        </Segmented>
-      ) : null}
       {showHabits ? (
         <section className="stats-view__habits" aria-label="Habit streaks">
           <Label>HABIT STREAKS</Label>
