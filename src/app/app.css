@@ -36,9 +36,26 @@ body {
 
 .app-header {
   display: grid;
-  grid-template-columns: auto auto 1fr auto;
+  grid-template-columns: auto 1fr auto;
   align-items: center;
-  gap: var(--eink-size-32);
+  gap: var(--eink-size-16) var(--eink-size-32);
+}
+
+.app-header > :nth-child(1) {
+  grid-area: 1 / 1;
+}
+
+.app-header > :nth-child(3) {
+  grid-area: 1 / 2;
+}
+
+.app-header > :nth-child(4) {
+  grid-area: 1 / 3;
+}
+
+.app-header > :nth-child(2) {
+  grid-area: 2 / 1 / 3 / -1;
+  justify-self: stretch;
 }
 
 .app-header .app-header__brand.app-header__brand {
@@ -66,25 +83,11 @@ body {
   }
 
   .app-header {
-    grid-template-columns: auto 1fr auto;
     gap: var(--eink-size-16);
   }
 
-  .app-header > :nth-child(1) {
-    grid-area: 1 / 1;
-  }
-
   .app-header > :nth-child(3) {
-    grid-area: 1 / 2;
     justify-content: center;
-  }
-
-  .app-header > :nth-child(4) {
-    grid-area: 1 / 3;
-  }
-
-  .app-header > :nth-child(2) {
-    grid-area: 2 / 1 / 3 / -1;
   }
 }
 
