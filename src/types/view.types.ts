@@ -1,5 +1,5 @@
 /** Top-level views of the app. */
-export type ViewName = "day" | "week" | "history";
+export type ViewName = "day" | "week" | "history" | "stats";
 
 /** Modal currently shown over the app. */
 export type ModalState =

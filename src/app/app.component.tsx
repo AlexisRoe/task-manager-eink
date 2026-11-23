@@ -7,6 +7,7 @@ import { useUiStore } from "@/store/ui.store";
 import { Alert, Button } from "@/ui";
 import { DayView } from "@/views/day/day.view";
 import { HistoryView } from "@/views/history/history.view";
+import { StatsView } from "@/views/stats/stats.view";
 import { WeekView } from "@/views/week/week.view";
 import { AppProviders } from "./app-providers.component";
 import { StandaloneGate } from "./standalone-gate.component";
@@ -49,6 +50,7 @@ function Planner() {
         {view === "day" ? <DayView /> : null}
         {view === "week" ? <WeekView /> : null}
         {view === "history" ? <HistoryView /> : null}
+        {view === "stats" ? <StatsView /> : null}
       </main>
     </div>
   );

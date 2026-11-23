@@ -9,6 +9,7 @@ const VIEWS: readonly { id: ViewName; label: string }[] = [
   { id: "day", label: "Day" },
   { id: "week", label: "Week" },
   { id: "history", label: "History" },
+  { id: "stats", label: "Stats" },
 ];
 
 const isViewName = (value: string): value is ViewName => VIEWS.some((view) => view.id === value);
@@ -36,7 +37,9 @@ export function AppHeader() {
           </Segmented.Item>
         ))}
       </Segmented>
-      <div className="app-header__nav">{view === "history" ? null : <DateNav />}</div>
+      <div className="app-header__nav">
+        {view === "history" || view === "stats" ? null : <DateNav />}
+      </div>
       <div className="app-header__actions">
         <Button.Outlined
           iconLeft="plus"

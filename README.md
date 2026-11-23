@@ -23,6 +23,7 @@ This application was **reimplemented from a design prototype with security-by-de
 - **Day view**: hour timeline with a live "now" marker, the day's habits, scheduled and "Anytime" lists, expandable rows with notes, edit, move-to-tomorrow and delete. In portrait it shows one pane at a time and opens on the list.
 - **Week view**: Monday to Sunday columns with per-day progress, today highlighted, tap a day to open it. Habits are not shown here.
 - **History view**: 18-week completion heatmaps for tasks and for habits, plus a drill-down into any day where tasks and habits can still be checked off.
+- **Stats view**: habit streaks (current, longest, 30-day rate, always/never flags), weekly task trend, and completion by weekday, project and priority; portrait splits it into Habits and Tasks panes.
 - **Daily habits**: up to 7 active habits with just a title, no time, done at any point of the day. Check them off today or on past days, rename or delete them; deleting stops a habit from today on and keeps its past check-ins.
 - **Recurring tasks**: daily, weekdays or weekly, with "only this day" or "this and all future days" deletion.
 - **Carry-over**: offers to move yesterday's unfinished tasks to today.
