@@ -38,7 +38,7 @@ body {
   display: grid;
   grid-template-columns: auto 1fr auto;
   align-items: center;
-  gap: var(--eink-size-16) var(--eink-size-32);
+  gap: var(--eink-size-16) var(--eink-size-8);
 }
 
 .app-header > :nth-child(1) {
@@ -81,24 +81,16 @@ body {
   .app {
     padding: var(--eink-size-16);
   }
-
-  .app-header {
-    gap: var(--eink-size-16);
-  }
-
-  .app-header > :nth-child(3) {
-    justify-content: center;
-  }
 }
 
 .date-nav {
   display: flex;
   align-items: center;
-  gap: var(--eink-size-12);
+  gap: var(--eink-size-8);
 }
 
 .date-nav__label {
-  min-width: var(--eink-size-128);
+  min-width: calc(var(--eink-size-64) + var(--eink-size-16));
   margin: 0;
   text-align: center;
 }
