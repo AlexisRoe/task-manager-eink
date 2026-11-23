@@ -8,8 +8,8 @@ import { useIsPortrait } from "@/hooks/orientation.hook";
 import { useStatsData } from "@/hooks/stats.hook";
 import {
   BarChart,
+  Card,
   ColumnChart,
-  Label,
   Pill,
   ProgressBar,
   Table,
@@ -27,7 +27,7 @@ export function StatsView() {
   const today = todayIso(useNow());
   const stats = useStatsData(today);
   const portrait = useIsPortrait();
-  const [habitsOnly, setHabitsOnly] = useState(true);
+  const [habitsOnly, setHabitsOnly] = useState(false);
   const showHabits = !portrait || habitsOnly;
   const showTasks = !portrait || !habitsOnly;
 
@@ -58,29 +58,37 @@ export function StatsView() {
           </div>
         ) : null}
       </div>
-      <section className="stats-view__headline" aria-label="Overview">
+      <Card className="stats-view__headline" role="region" aria-label="Overview">
         <div>
-          <Label>COMPLETION</Label>
+          <Title size="3" className="stats-view__label">
+            Completion
+          </Title>
           <Value unit="%" size="xl">
             {stats.rate}
           </Value>
         </div>
         <div>
-          <Label>DONE THIS WEEK</Label>
+          <Title size="3" className="stats-view__label">
+            Done this week
+          </Title>
           <Value unit="tasks" size="xl">
             {stats.doneThisWeek}
           </Value>
         </div>
         <div>
-          <Label>BEST STREAK</Label>
+          <Title size="3" className="stats-view__label">
+            Best streak
+          </Title>
           <Value unit="days" size="xl">
             {stats.bestStreak}
           </Value>
         </div>
-      </section>
+      </Card>
       {showHabits ? (
         <section className="stats-view__habits" aria-label="Habit streaks">
-          <Label>HABIT STREAKS</Label>
+          <Title size="3" className="stats-view__label">
+            Habit streaks
+          </Title>
           {stats.habits.length === 0 ? (
             <Text>No habits yet.</Text>
           ) : (
@@ -116,7 +124,10 @@ export function StatsView() {
         <div className="stats-view__charts">
           <section aria-label="Weekly trend">
             <div className="stats-view__chart-title">
-              <Label>{`TASKS PER WEEK · LAST ${STATS_WEEKS} WEEKS`}</Label>
+              <Title
+                size="3"
+                className="stats-view__label"
+              >{`Tasks per week · last ${STATS_WEEKS} weeks`}</Title>
               <Trend direction={trend} size="sm">
                 vs. last week
               </Trend>
@@ -132,7 +143,9 @@ export function StatsView() {
             />
           </section>
           <section aria-label="Weekday pattern">
-            <Label>COMPLETION BY WEEKDAY</Label>
+            <Title size="3" className="stats-view__label">
+              Completion by weekday
+            </Title>
             <ColumnChart
               datasets={[{ label: "Done %", data: stats.weekday }]}
               categories={[...WEEKDAY_LABELS]}
@@ -140,7 +153,9 @@ export function StatsView() {
             />
           </section>
           <section aria-label="By project">
-            <Label>COMPLETION BY PROJECT</Label>
+            <Title size="3" className="stats-view__label">
+              Completion by project
+            </Title>
             <BarChart
               datasets={[{ label: "Done %", data: stats.byProject }]}
               categories={[...PROJECTS]}
@@ -148,7 +163,9 @@ export function StatsView() {
             />
           </section>
           <section aria-label="By priority">
-            <Label>COMPLETION BY PRIORITY</Label>
+            <Title size="3" className="stats-view__label">
+              Completion by priority
+            </Title>
             <BarChart
               datasets={[{ label: "Done %", data: stats.byPriority }]}
               categories={[...PRIORITY_LABELS]}

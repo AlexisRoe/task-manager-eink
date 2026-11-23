@@ -38,10 +38,10 @@ describe("Stats view", () => {
   it("splits habits and tasks into panes in portrait", async () => {
     stubMatchMedia((query) => query === PORTRAIT_QUERY);
     render(<App />);
-    expect(await screen.findByLabelText("Habit streaks")).toBeInTheDocument();
-    expect(screen.queryByLabelText("Weekly trend")).not.toBeInTheDocument();
-    fireEvent.click(screen.getByRole("switch", { name: "Habits" }));
-    expect(screen.getByLabelText("Weekly trend")).toBeInTheDocument();
+    expect(await screen.findByLabelText("Weekly trend")).toBeInTheDocument();
     expect(screen.queryByLabelText("Habit streaks")).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("switch", { name: "Habits" }));
+    expect(screen.getByLabelText("Habit streaks")).toBeInTheDocument();
+    expect(screen.queryByLabelText("Weekly trend")).not.toBeInTheDocument();
   });
 });

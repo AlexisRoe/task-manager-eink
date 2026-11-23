@@ -2,7 +2,7 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   grid-template-rows: auto auto minmax(0, 1fr);
-  gap: var(--eink-size-24) var(--eink-size-32);
+  gap: var(--eink-size-24) var(--eink-size-64);
   height: 100%;
   overflow-y: auto;
 }
@@ -18,6 +18,10 @@
   margin: 0;
 }
 
+.stats-view .stats-view__label {
+  font-size: var(--eink-size-14);
+}
+
 .stats-view__toggle {
   display: flex;
   align-items: center;
@@ -27,7 +31,9 @@
 .stats-view__headline {
   grid-column: 1 / -1;
   display: flex;
+  justify-content: space-between;
   gap: var(--eink-size-48);
+  margin-bottom: var(--eink-size-24);
 }
 
 .stats-view__habits,
