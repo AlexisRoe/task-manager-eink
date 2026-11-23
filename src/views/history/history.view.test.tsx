@@ -64,9 +64,9 @@ describe("History view", () => {
     expect(
       await screen.findByLabelText("Task completion of the last 18 weeks"),
     ).toBeInTheDocument();
-    expect(screen.queryByText("SELECTED DAY")).not.toBeInTheDocument();
+    expect(screen.queryByText("Selected day")).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole("switch", { name: "Heatmaps" }));
-    expect(screen.getByText("SELECTED DAY")).toBeInTheDocument();
+    expect(screen.getByText("Selected day")).toBeInTheDocument();
     expect(screen.queryByLabelText("Task completion of the last 18 weeks")).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole("switch", { name: "Heatmaps" }));
     const yesterday = addDays(today, -1);
@@ -81,7 +81,7 @@ describe("History view", () => {
 
   it("hides future cells", async () => {
     render(<App />);
-    await screen.findByText("SELECTED DAY");
+    await screen.findByText("Selected day");
     const labels = screen
       .getAllByRole("button")
       .map((button) => button.getAttribute("aria-label") ?? "");

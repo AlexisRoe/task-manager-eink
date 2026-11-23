@@ -9,7 +9,7 @@ import { useIsPortrait } from "@/hooks/orientation.hook";
 import { useTaskActions } from "@/hooks/task-actions.hook";
 import { useUiStore } from "@/store/ui.store";
 import type { IsoDate } from "@/types/task.types";
-import { Button, Checkbox, Heatmap, type HeatmapCell, Label, Text, Title, Toggle } from "@/ui";
+import { Button, Checkbox, Heatmap, type HeatmapCell, Text, Title, Toggle } from "@/ui";
 import {
   addDays,
   formatDate,
@@ -106,7 +106,7 @@ export function HistoryView() {
         <div className="history-view__main">
           {portrait ? null : heading}
           <section className="history-view__heatmap" aria-label="Tasks">
-            <Label>TASKS</Label>
+            <Title size="2">Tasks</Title>
             <Heatmap
               columns={columns}
               columnLabels={columnLabels}
@@ -118,7 +118,7 @@ export function HistoryView() {
             />
           </section>
           <section className="history-view__heatmap" aria-label="Habits">
-            <Label>HABITS</Label>
+            <Title size="2">Habits</Title>
             <Heatmap
               columns={habitColumns}
               columnLabels={columnLabels}
@@ -133,8 +133,8 @@ export function HistoryView() {
       ) : null}
       {showDay ? (
         <aside className="history-view__selected" aria-label="Selected day">
-          <Label>SELECTED DAY</Label>
-          <Title size="2">{formatWeekdayLong(selected)}</Title>
+          <Title size="2">Selected day</Title>
+          <Title size="3">{formatWeekdayLong(selected)}</Title>
           <Text>{formatFullDate(selected)}</Text>
           <Title size="4" className="history-view__subheading">
             {done} of {total} completed
