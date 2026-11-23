@@ -45,4 +45,4 @@ Suffix states the purpose: `*.view.tsx`, `*.component.tsx`, `*.hook.ts`, `*.stor
 - Never commit secrets (`.env*`, `.dev.vars`, Cloudflare tokens).
 
 ## Git
-- Work on feature branches; `main` deploys to Cloudflare via GitHub Actions.
+- Work on feature branches; `main` is deployed to Cloudflare by the manually started `deploy.yml` workflow; merging does not deploy (ADR 0021).

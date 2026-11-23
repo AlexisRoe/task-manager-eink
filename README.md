@@ -137,13 +137,13 @@ The original prototype loaded web fonts from Google, kept state in memory and ha
 | **Input handling** | Every user input is trimmed, validated and length-limited (task and habit titles 120, notes 1000 characters, `HH:MM` times, enumerated values). User text is only rendered as React text; `dangerouslySetInnerHTML`, `eval` and `new Function` are not used. IDs come from `crypto.randomUUID()`. |
 | **Dependencies** | Five runtime dependencies, exact versions pinned, lockfile committed, installs via `npm ci`, `ignore-scripts=true`, `engine-strict`. Each dependency is justified in an ADR. |
 | **Supply-chain checks** | `npm run security` runs `npm audit` (fails on high severity) and verifies registry signatures; Dependabot updates npm packages and GitHub Actions weekly. |
-| **CI/CD** | GitHub Actions are pinned to commit SHAs with least-privilege `permissions`, no persisted checkout credentials, dependency review, gitleaks secret scanning and CodeQL on every PR. Deployment runs only from `main` in a protected `production` environment with a project-scoped token. |
+| **CI/CD** | GitHub Actions are pinned to commit SHAs with least-privilege `permissions`, no persisted checkout credentials, dependency review, gitleaks secret scanning and CodeQL on every PR. Deployment (currently manual only) runs only from `main` in a protected `production` environment with a project-scoped token. |
 | **Quality gates** | `npm run check` (lint, strict TypeScript, tests with enforced coverage thresholds, build) must pass before any change is done. |
 | **Secrets** | `.env*`, `.dev.vars` and Cloudflare tokens are git-ignored and never committed. |
 
 ## Deployment
 
-Merging to `main` runs `.github/workflows/deploy.yml`: `npm run check`, then `wrangler deploy` (static assets from `dist/`, SPA fallback in `wrangler.jsonc`). It needs a `production` environment and a project-scoped `CLOUDFLARE_API_TOKEN` secret.
+Deployment is paused: `.github/workflows/deploy.yml` runs only when started manually (see [ADR 0021](docs/decisions/0021-pause-automatic-deploy.md)). It runs `npm run check`, then `wrangler deploy` (static assets from `dist/`, SPA fallback in `wrangler.jsonc`). It needs a `production` environment and a project-scoped `CLOUDFLARE_API_TOKEN` secret.
 
 Set up branch protection on `main` yourself: require the `PR` checks (`check`, `dependency-review`, `secret-scan`) and `CodeQL`, require review, block force pushes.
 
