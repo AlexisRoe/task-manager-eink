@@ -10,13 +10,20 @@ export function emptyPersistedTasks(): PersistedTasks {
     series: [],
     occurrences: {},
     carryDismissedOn: null,
+    habits: [],
+    habitChecks: {},
   };
 }
 
 type Migration = (state: unknown) => unknown;
 
+const isObject = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null && !Array.isArray(value);
+
 /** Migrations keyed by the version they upgrade from; each returns the next version's shape. */
-const MIGRATIONS: Readonly<Record<number, Migration>> = {};
+const MIGRATIONS: Readonly<Record<number, Migration>> = {
+  1: (state) => (isObject(state) ? { ...state, habits: [], habitChecks: {} } : state),
+};
 
 /**
  * Upgrades persisted data from any older version to the current schema and validates the result.

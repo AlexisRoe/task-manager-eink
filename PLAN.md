@@ -41,7 +41,7 @@ Runtime deps are limited to: `react`, `react-dom`, `zustand`, `idb-keyval`, `e-i
 - **Row meta:** `Project · ↻ Rule · Carried over · Has note` (Has note hidden when expanded); priority badge shown for P1 (filled) / P2 (outlined) when not done.
 - **Timeline:** hour grid `DAY_START_HOUR..DAY_END_HOUR`, blocks positioned by start/duration (min height), done = greyed + strike-through, P1 undone = inverted; click block = expand row; now-marker with live minute clock on today; auto-scroll to now−4h (today) or 08:00 (other days) on date/view change.
 - **Week:** ISO week number, Mon–Sun columns, per-day progress bar + `k/n`, today column inverted, past columns tinted, header click → Day view for that date; items toggle done.
-- **History:** 18 weeks ending this week; cell buckets (none/ <25 / ≥25 / ≥50 / ≥75 / 100 %), future cells hidden, selected-day outline; stats: streak (consecutive days before today with ≥75 % done and ≥1 task), tasks done in last 30 days (excl. today), average completion over the 18 weeks; selected-day list + "Open this day".
+- **History:** 18 weeks ending this week; cell buckets (none/ <25 / ≥25 / ≥50 / ≥75 / 100 %), future cells hidden, selected-day outline; a second heatmap for daily habits (ADR 0017); no headline statistics (removed); selected-day list + "Open this day".
 - **Nav:** prev/next steps 1 day (Day) or 7 days (Week); "Today" resets; nav hidden in History.
 - All tunables live in config (see §6), not in components.
 

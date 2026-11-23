@@ -3,7 +3,7 @@ import { App } from "@/app/app.component";
 import { PORTRAIT_QUERY } from "@/config/pwa.config";
 import { useTasksStore } from "@/store/tasks.store";
 import { resetUiStore, useUiStore } from "@/store/ui.store";
-import { makeSeries, makeTask, seedTasks } from "@/test/fixtures.utils";
+import { makeHabit, makeSeries, makeTask, seedTasks } from "@/test/fixtures.utils";
 import { stubMatchMedia } from "@/test/match-media.utils";
 import { addDays, todayIso } from "@/utils/date.utils";
 
@@ -119,9 +119,12 @@ describe("Day view", () => {
     expect(screen.getAllByRole("button", { name: "Draft roadmap" }).length).toBeGreaterThan(0);
   });
 
-  it("shows one pane at a time in portrait", async () => {
+  it("shows one pane at a time in portrait, starting with the list", async () => {
     stubMatchMedia((query) => query === PORTRAIT_QUERY);
     await renderDay();
+    expect(screen.getByRole("region", { name: "Scheduled" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Draft roadmap" })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Timeline" }));
     expect(screen.queryByRole("region", { name: "Scheduled" })).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "List" }));
     expect(screen.getByRole("region", { name: "Scheduled" })).toBeInTheDocument();
@@ -132,5 +135,48 @@ describe("Day view", () => {
     await renderDay();
     expect(screen.queryByText("Today", { selector: ".eink-pill__label" })).not.toBeInTheDocument();
     expect(screen.queryByText(/unfinished/)).not.toBeInTheDocument();
+  });
+});
+
+describe("Day view habits", () => {
+  beforeEach(() => {
+    seedTasks({
+      tasks: [makeTask({ id: "b", date: today, title: "Call mum" })],
+      habits: [makeHabit({ id: "h", title: "Stretch", startDate: yesterday })],
+    });
+  });
+
+  it("lists habits above the task lists without counting them as tasks", async () => {
+    await renderDay();
+    const habits = screen.getByRole("region", { name: "Habits" });
+    expect(within(habits).getByText("Stretch")).toBeInTheDocument();
+    expect(within(habits).getByText("0/1")).toBeInTheDocument();
+    expect(screen.getByText("0 of 1 done")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("checkbox", { name: 'Mark habit "Stretch" as done' }));
+    expect(within(habits).getByText("1/1")).toBeInTheDocument();
+    expect(useTasksStore.getState().habitChecks).toEqual({ [`h:${today}`]: true });
+    expect(screen.getByText("0 of 1 done")).toBeInTheDocument();
+  });
+
+  it("allows checking past days but not future days", async () => {
+    useUiStore.setState({ date: addDays(today, 1) });
+    await renderDay();
+    expect(screen.getByRole("checkbox", { name: 'Mark habit "Stretch" as done' })).toBeDisabled();
+  });
+
+  it("hides the section on days before the habit started", async () => {
+    useUiStore.setState({ date: addDays(yesterday, -1) });
+    await renderDay();
+    expect(screen.queryByRole("region", { name: "Habits" })).not.toBeInTheDocument();
+  });
+
+  it("opens edit and delete from an expanded habit row", async () => {
+    await renderDay();
+    fireEvent.click(screen.getByRole("button", { name: "Stretch" }));
+    fireEvent.click(screen.getByRole("button", { name: "Edit" }));
+    expect(useUiStore.getState().modal).toEqual({ kind: "edit-habit", id: "h" });
+    useUiStore.getState().closeModal();
+    fireEvent.click(await screen.findByRole("button", { name: "Delete" }));
+    expect(useUiStore.getState().modal).toEqual({ kind: "delete-habit", id: "h" });
   });
 });

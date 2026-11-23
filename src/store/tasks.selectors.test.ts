@@ -1,7 +1,10 @@
 import {
+  selectActiveHabitCount,
   selectCarryOverCandidates,
+  selectDayHabits,
   selectDayStats,
   selectDayTasks,
+  selectHabitStatsByDate,
   selectSeries,
   selectShowCarryOver,
   selectStatsByDate,
@@ -44,6 +47,11 @@ const data: TasksData = {
     "s:2026-11-20": { done: false, skipped: true },
   },
   carryDismissedOn: null,
+  habits: [
+    { id: "h2", title: "Walk", startDate: "2026-11-18", endDate: null },
+    { id: "h1", title: "Read", startDate: "2026-11-17", endDate: "2026-11-19" },
+  ],
+  habitChecks: { "h1:2026-11-18": true, "h2:2026-11-18": true, "h2:2026-11-19": true },
 };
 
 describe("tasks selectors", () => {
@@ -76,5 +84,37 @@ describe("tasks selectors", () => {
   it("looks up series", () => {
     expect(selectSeries(data, "s")).toBe(series);
     expect(selectSeries(data, "x")).toBeUndefined();
+  });
+
+  it("never mixes habits into day tasks", () => {
+    expect(selectDayTasks(data, "2026-11-18").map((t) => t.id)).toEqual(["s", "y"]);
+  });
+});
+
+describe("habit selectors", () => {
+  it("lists habits active on a day, oldest first, with their done state", () => {
+    expect(selectDayHabits(data, "2026-11-16")).toEqual([]);
+    expect(selectDayHabits(data, "2026-11-17")).toEqual([
+      { id: "h1", title: "Read", date: "2026-11-17", done: false },
+    ]);
+    expect(selectDayHabits(data, "2026-11-18").map((h) => [h.id, h.done])).toEqual([
+      ["h1", true],
+      ["h2", true],
+    ]);
+    expect(selectDayHabits(data, "2026-11-19").map((h) => h.id)).toEqual(["h2"]);
+  });
+
+  it("counts only running habits as active", () => {
+    expect(selectActiveHabitCount(data)).toBe(1);
+  });
+
+  it("computes habit stats per date", () => {
+    const stats = selectHabitStatsByDate(data, "2026-11-16", "2026-11-20");
+    expect([...stats.entries()]).toEqual([
+      ["2026-11-17", { total: 1, done: 0 }],
+      ["2026-11-18", { total: 2, done: 2 }],
+      ["2026-11-19", { total: 1, done: 1 }],
+      ["2026-11-20", { total: 1, done: 0 }],
+    ]);
   });
 });

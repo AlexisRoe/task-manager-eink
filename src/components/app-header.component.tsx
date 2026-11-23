@@ -1,4 +1,6 @@
 import { DateNav } from "@/components/date-nav.component";
+import { HABITS_MAX_ACTIVE } from "@/constants/habit.constants";
+import { useActiveHabitCount } from "@/hooks/habits.hook";
 import { useUiStore } from "@/store/ui.store";
 import type { ViewName } from "@/types/view.types";
 import { Button, Segmented, Title } from "@/ui";
@@ -11,11 +13,12 @@ const VIEWS: readonly { id: ViewName; label: string }[] = [
 
 const isViewName = (value: string): value is ViewName => VIEWS.some((view) => view.id === value);
 
-/** Brand, view switch, date navigation and the "New task" action. */
+/** Brand, view switch, date navigation and the "New habit" / "New task" actions. */
 export function AppHeader() {
   const view = useUiStore((state) => state.view);
   const setView = useUiStore((state) => state.setView);
   const openModal = useUiStore((state) => state.openModal);
+  const habitsFull = useActiveHabitCount() >= HABITS_MAX_ACTIVE;
 
   return (
     <header className="app-header">
@@ -34,9 +37,21 @@ export function AppHeader() {
         ))}
       </Segmented>
       <div className="app-header__nav">{view === "history" ? null : <DateNav />}</div>
-      <Button iconLeft="plus" onClick={() => openModal({ kind: "new-task" })}>
-        New task
-      </Button>
+      <div className="app-header__actions">
+        <Button.Outlined
+          iconLeft="plus"
+          disabled={habitsFull}
+          title={
+            habitsFull ? `${HABITS_MAX_ACTIVE} of ${HABITS_MAX_ACTIVE} habits active` : undefined
+          }
+          onClick={() => openModal({ kind: "new-habit" })}
+        >
+          New habit
+        </Button.Outlined>
+        <Button iconLeft="plus" onClick={() => openModal({ kind: "new-task" })}>
+          New task
+        </Button>
+      </div>
     </header>
   );
 }

@@ -1,4 +1,6 @@
+import { DeleteHabitModal } from "@/components/delete-habit-modal.component";
 import { DeleteRecurringModal } from "@/components/delete-recurring-modal.component";
+import { HabitModal } from "@/components/habit-modal.component";
 import { NewTaskModal } from "@/components/new-task-modal.component";
 import { useTasksStore } from "@/store/tasks.store";
 import { useUiStore } from "@/store/ui.store";
@@ -12,6 +14,7 @@ export function ModalHost() {
   const close = useUiStore((state) => state.closeModal);
   const tasks = useTasksStore((state) => state.tasks);
   const series = useTasksStore((state) => state.series);
+  const habits = useTasksStore((state) => state.habits);
 
   switch (modal.kind) {
     case "new-task":
@@ -29,6 +32,18 @@ export function ModalHost() {
     }
     case "delete-recurring":
       return <DeleteRecurringModal seriesId={modal.seriesId} date={modal.date} onClose={close} />;
+    case "new-habit":
+      return <HabitModal today={todayIso()} onClose={close} />;
+    case "edit-habit": {
+      const habit = habits.find((h) => h.id === modal.id);
+      if (habit === undefined) return null;
+      return <HabitModal today={todayIso()} onClose={close} editing={habit} />;
+    }
+    case "delete-habit": {
+      const habit = habits.find((h) => h.id === modal.id);
+      if (habit === undefined) return null;
+      return <DeleteHabitModal habit={habit} today={todayIso()} onClose={close} />;
+    }
     case "none":
       return null;
   }

@@ -8,7 +8,7 @@ export const DAY_PANES: readonly { id: DayPane; label: string }[] = [
 ];
 
 /** Pane shown first when the Day view is opened in portrait. */
-export const DEFAULT_DAY_PANE: DayPane = "timeline";
+export const DEFAULT_DAY_PANE: DayPane = "list";
 
 /** Narrows a string to a {@link DayPane}. */
 export const isDayPane = (value: string): value is DayPane =>

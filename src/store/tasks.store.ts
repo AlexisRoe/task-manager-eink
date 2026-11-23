@@ -1,9 +1,11 @@
 import { create } from "zustand";
 import { createJSONStorage, persist, type StateStorage } from "zustand/middleware";
 import { PERSIST_KEY, SCHEMA_VERSION } from "@/config/storage.config";
+import { HABITS_MAX_ACTIVE } from "@/constants/habit.constants";
 import { createIdbStorage } from "@/store/idb.storage";
 import { emptyPersistedTasks, migratePersistedTasks } from "@/store/tasks.migrations";
 import type {
+  Habit,
   IsoDate,
   OccurrenceState,
   PersistedTasks,
@@ -12,7 +14,8 @@ import type {
   Task,
   TaskInput,
 } from "@/types/task.types";
-import { addDays } from "@/utils/date.utils";
+import { addDays, compareIso } from "@/utils/date.utils";
+import { habitCheckKey, isHabitActiveOn, isHabitRunning } from "@/utils/habit.utils";
 import { createId } from "@/utils/id.utils";
 import { EMPTY_OCCURRENCE, endSeriesBefore, occurrenceKey } from "@/utils/recurrence.utils";
 
@@ -47,12 +50,23 @@ export interface TasksState extends PersistedTasks {
   dismissCarryOver: (today: IsoDate) => void;
   /** Hides the notice about reset data. */
   acknowledgeRecovery: () => void;
+  /**
+   * Starts a daily habit on `today`; returns `false` and changes nothing when the maximum number
+   * of active habits is already reached.
+   */
+  addHabit: (title: string, today: IsoDate) => boolean;
+  /** Changes the title of a habit, on all days. */
+  renameHabit: (id: string, title: string) => void;
+  /** Flips whether a habit is done on `date`; ignored when the habit is not active on that date. */
+  toggleHabit: (id: string, date: IsoDate) => void;
+  /** Ends a habit as of `today`, keeping past check-ins; a habit started today is removed entirely. */
+  deleteHabit: (id: string, today: IsoDate) => void;
 }
 
 /** Plain data of the store, used for selectors and persistence. */
 export type TasksData = Pick<
   PersistedTasks,
-  "tasks" | "series" | "occurrences" | "carryDismissedOn"
+  "tasks" | "series" | "occurrences" | "carryDismissedOn" | "habits" | "habitChecks"
 >;
 
 const initialData = (): PersistedTasks => emptyPersistedTasks();
@@ -68,7 +82,7 @@ function oneOff(input: TaskInput, date: IsoDate, carriedOver: boolean): Task {
 export function createTasksStore(storage: StateStorage = createIdbStorage()) {
   return create<TasksState>()(
     persist(
-      (set) => ({
+      (set, get) => ({
         ...initialData(),
         recoveredFromCorruption: false,
 
@@ -169,6 +183,46 @@ export function createTasksStore(storage: StateStorage = createIdbStorage()) {
         dismissCarryOver: (today) => set({ carryDismissedOn: today }),
 
         acknowledgeRecovery: () => set({ recoveredFromCorruption: false }),
+
+        addHabit: (title, today) => {
+          const state = get();
+          if (state.habits.filter(isHabitRunning).length >= HABITS_MAX_ACTIVE) return false;
+          const habit: Habit = { id: createId(), title, startDate: today, endDate: null };
+          set({ habits: [...state.habits, habit] });
+          return true;
+        },
+
+        renameHabit: (id, title) =>
+          set((state) => ({
+            habits: state.habits.map((h) => (h.id === id ? { ...h, title } : h)),
+          })),
+
+        toggleHabit: (id, date) =>
+          set((state) => {
+            const habit = state.habits.find((h) => h.id === id);
+            if (!habit || !isHabitActiveOn(habit, date)) return {};
+            const key = habitCheckKey(id, date);
+            const { [key]: checked, ...rest } = state.habitChecks;
+            return { habitChecks: checked ? rest : { ...rest, [key]: true } };
+          }),
+
+        deleteHabit: (id, today) =>
+          set((state) => {
+            const habit = state.habits.find((h) => h.id === id);
+            if (!habit) return {};
+            if (compareIso(habit.startDate, today) >= 0) {
+              const prefix = `${id}:`;
+              return {
+                habits: state.habits.filter((h) => h.id !== id),
+                habitChecks: Object.fromEntries(
+                  Object.entries(state.habitChecks).filter(([key]) => !key.startsWith(prefix)),
+                ),
+              };
+            }
+            return {
+              habits: state.habits.map((h) => (h.id === id ? { ...h, endDate: today } : h)),
+            };
+          }),
       }),
       {
         name: PERSIST_KEY,
@@ -180,8 +234,12 @@ export function createTasksStore(storage: StateStorage = createIdbStorage()) {
           series: state.series,
           occurrences: state.occurrences,
           carryDismissedOn: state.carryDismissedOn,
+          habits: state.habits,
+          habitChecks: state.habitChecks,
         }),
-        migrate: (persisted, version) => migratePersistedTasks(persisted, version) ?? initialData(),
+        // Unusable data is passed through unchanged so `merge` rejects it and flags the reset.
+        migrate: (persisted, version) =>
+          (migratePersistedTasks(persisted, version) ?? persisted) as TasksState,
         merge: (persisted, current) => {
           const valid = migratePersistedTasks(persisted, SCHEMA_VERSION);
           if (valid === null) {

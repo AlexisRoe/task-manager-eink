@@ -22,6 +22,10 @@ If the lib does not contain the components needed to do it, open a new PR to add
 
 Use the prototype and the screenshots to recreate the same logic internally
 
+### Daily habits
+
+Besides tasks there are daily habits, created with "New habit" next to "New task". A habit has only a title, applies to every day without a time, and can be checked off at any point during that day (today or a past day, never a future one). At most 7 habits can be active at the same time. Habits can be renamed and deleted; deleting stops the habit from today on and keeps its past check-ins. The Day view lists them in their own section above the tasks. History shows a second heatmap for habits next to the task heatmap. The Week view does not show habits. See ADR [0017](docs/decisions/0017-daily-habits.md).
+
 ## Security
 
 Security-by-design has to be applied to local development, dependencies, tests, git pipelines, security checks, etc.

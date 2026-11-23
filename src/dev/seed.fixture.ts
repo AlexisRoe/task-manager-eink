@@ -1,6 +1,7 @@
 import type { TasksStore } from "@/store/tasks.store";
-import type { RecurringSeries, Task } from "@/types/task.types";
+import type { Habit, RecurringSeries, Task } from "@/types/task.types";
 import { addDays, todayIso } from "@/utils/date.utils";
+import { habitCheckKey } from "@/utils/habit.utils";
 
 const base = { durationMin: 30, priority: 3, project: "Work", notes: "" } as const;
 
@@ -16,7 +17,12 @@ const task = (id: string, date: string, title: string, over: Partial<Task> = {})
 });
 
 /** Demo content mirroring the prototype, anchored on today, for local development only. */
-export function demoData(today: string): { tasks: Task[]; series: RecurringSeries[] } {
+export function demoData(today: string): {
+  tasks: Task[];
+  series: RecurringSeries[];
+  habits: Habit[];
+  habitChecks: Record<string, true>;
+} {
   const series: RecurringSeries[] = [
     {
       ...base,
@@ -84,13 +90,26 @@ export function demoData(today: string): { tasks: Task[]; series: RecurringSerie
     }),
     task("demo-7", addDays(today, -1), "Send invoice", { start: "15:00" }),
   ];
-  return { tasks, series };
+  const habits: Habit[] = [
+    { id: "demo-h-water", title: "Drink 2 l water", startDate: addDays(today, -60), endDate: null },
+    { id: "demo-h-walk", title: "Walk 20 minutes", startDate: addDays(today, -45), endDate: null },
+    { id: "demo-h-read", title: "Read 10 pages", startDate: addDays(today, -30), endDate: null },
+  ];
+  const habitChecks: Record<string, true> = {};
+  habits.forEach((habit, index) => {
+    for (let offset = 1; offset <= 60; offset += 1) {
+      const date = addDays(today, -offset);
+      if (date < habit.startDate || (offset + index) % (index + 2) === 0) continue;
+      habitChecks[habitCheckKey(habit.id, date)] = true;
+    }
+  });
+  return { tasks, series, habits, habitChecks };
 }
 
 /** Fills an empty store with demo data once persisted state has loaded. */
 export async function seedDemoDataWhenEmpty(store: TasksStore): Promise<void> {
   if (!store.persist.hasHydrated()) await store.persist.rehydrate();
-  const { tasks, series } = store.getState();
-  if (tasks.length > 0 || series.length > 0) return;
+  const { tasks, series, habits } = store.getState();
+  if (tasks.length > 0 || series.length > 0 || habits.length > 0) return;
   store.setState(demoData(todayIso()));
 }
