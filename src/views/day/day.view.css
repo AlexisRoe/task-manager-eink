@@ -31,6 +31,12 @@
   min-height: 0;
 }
 
+@media (orientation: portrait) {
+  .day-view__columns {
+    grid-template-columns: 1fr;
+  }
+}
+
 .day-view__block-time {
   font-family: var(--eink-font-family-secondary);
 }

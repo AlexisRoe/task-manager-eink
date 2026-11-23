@@ -1,11 +1,15 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import { App } from "@/app/app.component";
+import { PORTRAIT_QUERY } from "@/config/pwa.config";
 import { useTasksStore } from "@/store/tasks.store";
 import { resetUiStore, useUiStore } from "@/store/ui.store";
 import { makeTask, seedTasks } from "@/test/fixtures.utils";
+import { stubMatchMedia } from "@/test/match-media.utils";
 import { addDays, formatFullDate, todayIso } from "@/utils/date.utils";
 
 const today = todayIso();
+
+afterEach(() => stubMatchMedia());
 
 beforeEach(() => {
   resetUiStore();
@@ -50,6 +54,26 @@ describe("History view", () => {
     fireEvent.click(await screen.findByRole("checkbox", { name: 'Mark "Today task" as done' }));
     expect(useTasksStore.getState().tasks.find((t) => t.id === "t")?.done).toBe(true);
     expect(screen.getByText("1 of 1 completed")).toBeInTheDocument();
+  });
+
+  it("shows one pane at a time in portrait and opens the day on selection", async () => {
+    stubMatchMedia((query) => query === PORTRAIT_QUERY);
+    render(<App />);
+    expect(await screen.findByText("Current streak, 75% or more done")).toBeInTheDocument();
+    expect(screen.queryByText("SELECTED DAY")).not.toBeInTheDocument();
+    const toggle = within(screen.getByLabelText("History layout"));
+    fireEvent.click(toggle.getByRole("button", { name: "Day" }));
+    expect(screen.getByText("SELECTED DAY")).toBeInTheDocument();
+    expect(screen.queryByText("Current streak, 75% or more done")).not.toBeInTheDocument();
+    fireEvent.click(toggle.getByRole("button", { name: "Statistics" }));
+    const yesterday = addDays(today, -1);
+    const cell = screen
+      .getAllByRole("button", { pressed: false })
+      .find((button) =>
+        button.getAttribute("aria-label")?.endsWith(`${formatFullDate(yesterday)}: 1 of 1 done`),
+      );
+    fireEvent.click(cell as HTMLElement);
+    expect(screen.getByText("Done yesterday")).toBeInTheDocument();
   });
 
   it("hides future cells", async () => {

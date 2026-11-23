@@ -2,7 +2,7 @@
 
 **A calm, private day planner for e-ink tablets.**
 
-Daybook is a landscape-only, standalone-only Progressive Web App for planning your day, your week and looking back at your habits. It is built for the constraints of e-ink screens: high contrast, no animations, no colour, large touch targets.
+Daybook is a standalone-only Progressive Web App (landscape and portrait) for planning your day, your week and looking back at your habits. It is built for the constraints of e-ink screens: high contrast, no animations, no colour, large touch targets.
 
 Everything stays on your device. Tasks live in IndexedDB, the app makes **no network requests** after it is installed, and there is no account, analytics or telemetry.
 

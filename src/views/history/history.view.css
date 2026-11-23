@@ -57,3 +57,11 @@
 .history-view__task-time {
   font-family: var(--eink-font-family-secondary);
 }
+
+@media (orientation: portrait) {
+  .history-view {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto minmax(0, 1fr);
+    gap: var(--eink-size-24);
+  }
+}
