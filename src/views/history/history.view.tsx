@@ -1,13 +1,6 @@
 import "./history.view.css";
 import { useMemo, useState } from "react";
-import {
-  DEFAULT_HISTORY_PANE,
-  HEATMAP_ROW_LABELS,
-  HISTORY_PANES,
-  HISTORY_WEEKS,
-  type HistoryPane,
-  isHistoryPane,
-} from "@/constants/history.constants";
+import { HEATMAP_ROW_LABELS, HISTORY_WEEKS } from "@/constants/history.constants";
 import { useDayData } from "@/hooks/day.hook";
 import { useDayHabits, useToggleHabit } from "@/hooks/habits.hook";
 import { useHistoryData } from "@/hooks/history.hook";
@@ -16,7 +9,7 @@ import { useIsPortrait } from "@/hooks/orientation.hook";
 import { useTaskActions } from "@/hooks/task-actions.hook";
 import { useUiStore } from "@/store/ui.store";
 import type { IsoDate } from "@/types/task.types";
-import { Button, Checkbox, Heatmap, type HeatmapCell, Label, Segmented, Text, Title } from "@/ui";
+import { Button, Checkbox, Heatmap, type HeatmapCell, Label, Text, Title, Toggle } from "@/ui";
 import {
   addDays,
   formatDate,
@@ -61,13 +54,13 @@ export function HistoryView() {
   const { toggleDone } = useTaskActions();
   const toggleHabit = useToggleHabit();
   const portrait = useIsPortrait();
-  const [pane, setPane] = useState<HistoryPane>(DEFAULT_HISTORY_PANE);
-  const showOverview = !portrait || pane === "overview";
-  const showDay = !portrait || pane === "day";
+  const [heatmapsOnly, setHeatmapsOnly] = useState(true);
+  const showOverview = !portrait || heatmapsOnly;
+  const showDay = !portrait || !heatmapsOnly;
 
   const selectDay = (date: string) => {
     setSelected(date);
-    setPane("day");
+    setHeatmapsOnly(false);
   };
 
   const columns = useMemo(
@@ -92,30 +85,26 @@ export function HistoryView() {
   const first = weekStarts[0] ?? today;
   const range = `${formatDate(first, { month: "long" })} – ${formatDate(today, { month: "long", year: "numeric" })}`;
 
+  const heading = (
+    <div className="history-view__heading">
+      <Title size="1">History</Title>
+      <Text as="span">{range}</Text>
+      {portrait ? (
+        <div className="history-view__toggle">
+          <Toggle checked={heatmapsOnly} onChange={setHeatmapsOnly}>
+            Heatmaps
+          </Toggle>
+        </div>
+      ) : null}
+    </div>
+  );
+
   return (
     <div className="history-view">
-      {portrait ? (
-        <Segmented
-          className="history-view__panes"
-          value={pane}
-          onChange={(id) => {
-            if (isHistoryPane(id)) setPane(id);
-          }}
-          aria-label="History layout"
-        >
-          {HISTORY_PANES.map(({ id, label }) => (
-            <Segmented.Item key={id} id={id}>
-              {label}
-            </Segmented.Item>
-          ))}
-        </Segmented>
-      ) : null}
+      {portrait ? heading : null}
       {showOverview ? (
         <div className="history-view__main">
-          <div className="history-view__heading">
-            <Title size="1">History</Title>
-            <Text as="span">{range}</Text>
-          </div>
+          {portrait ? null : heading}
           <section className="history-view__heatmap" aria-label="Tasks">
             <Label>TASKS</Label>
             <Heatmap

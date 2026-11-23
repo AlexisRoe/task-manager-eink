@@ -29,6 +29,12 @@
   margin: 0;
 }
 
+.history-view__toggle {
+  display: flex;
+  align-items: center;
+  margin-left: auto;
+}
+
 .history-view__selected {
   display: flex;
   flex-direction: column;
