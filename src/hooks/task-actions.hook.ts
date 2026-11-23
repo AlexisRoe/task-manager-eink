@@ -6,6 +6,8 @@ import type { DayTask } from "@/types/task.types";
 /** Handlers that apply user actions to a day task, regardless of whether it is one-off or recurring. */
 export interface TaskActions {
   toggleDone: (task: DayTask) => void;
+  /** Opens the edit form for the task. */
+  edit: (task: DayTask) => void;
   moveToTomorrow: (task: DayTask) => void;
   /** Deletes a one-off task, or asks how to delete a recurring one. */
   remove: (task: DayTask) => void;
@@ -30,6 +32,10 @@ export function useTaskActions(): TaskActions {
     },
     [move, toggleRow],
   );
+  const edit = useCallback(
+    (task: DayTask) => openModal({ kind: "edit-task", source: task.source, id: task.id }),
+    [openModal],
+  );
   const remove = useCallback(
     (task: DayTask) => {
       if (task.source === "task") {
@@ -40,7 +46,7 @@ export function useTaskActions(): TaskActions {
     },
     [deleteTask, openModal],
   );
-  return { toggleDone, moveToTomorrow, remove };
+  return { toggleDone, edit, moveToTomorrow, remove };
 }
 
 /** Stable key of a day task, used to track which row is expanded. */

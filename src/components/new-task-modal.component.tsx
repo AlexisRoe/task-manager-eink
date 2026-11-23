@@ -11,7 +11,7 @@ import {
   TITLE_MAX_LENGTH,
 } from "@/constants/task.constants";
 import { useTasksStore } from "@/store/tasks.store";
-import type { IsoDate } from "@/types/task.types";
+import type { IsoDate, TaskInput } from "@/types/task.types";
 import { Button, Chip, Input, Modal, Text, TextArea, TimeInput } from "@/ui";
 import { formatDate } from "@/utils/date.utils";
 import { type TaskDraft, type TaskDraftErrors, validateTaskDraft } from "@/utils/validate.utils";
@@ -21,15 +21,17 @@ export interface NewTaskModalProps {
   /** Date the task is created for. */
   date: IsoDate;
   onClose: () => void;
+  /** When set, the modal edits this task (or all occurrences of this series) instead of creating one. */
+  editing?: { source: "task" | "series"; id: string; task: TaskInput };
 }
 
-const initialDraft = (): TaskDraft => ({
-  title: "",
-  start: "",
-  durationMin: TASK_DEFAULTS.durationMin,
-  priority: TASK_DEFAULTS.priority,
-  project: TASK_DEFAULTS.project,
-  notes: "",
+const initialDraft = (editing?: NewTaskModalProps["editing"]): TaskDraft => ({
+  title: editing?.task.title ?? "",
+  start: editing?.task.start ?? "",
+  durationMin: editing?.task.durationMin ?? TASK_DEFAULTS.durationMin,
+  priority: editing?.task.priority ?? TASK_DEFAULTS.priority,
+  project: editing?.task.project ?? TASK_DEFAULTS.project,
+  notes: editing?.task.notes ?? "",
   repeat: TASK_DEFAULTS.repeat,
 });
 
@@ -69,12 +71,13 @@ function ChoiceRow<T extends string | number>({
 }
 
 /**
- * Form modal for creating a task. Input is validated and length-limited before it reaches the
+ * Form modal for creating or, with `editing`, changing a task. Input is validated and length-limited before it reaches the
  * store; a repeat other than "None" creates a recurring series anchored on the target date.
  */
-export function NewTaskModal({ date, onClose }: NewTaskModalProps) {
+export function NewTaskModal({ date, onClose, editing }: NewTaskModalProps) {
   const addTask = useTasksStore((state) => state.addTask);
-  const [draft, setDraft] = useState<TaskDraft>(initialDraft);
+  const updateTask = useTasksStore((state) => state.updateTask);
+  const [draft, setDraft] = useState<TaskDraft>(() => initialDraft(editing));
   const [errors, setErrors] = useState<TaskDraftErrors>({});
   const update = <K extends keyof TaskDraft>(key: K, value: TaskDraft[K]) =>
     setDraft((current) => ({ ...current, [key]: value }));
@@ -85,12 +88,19 @@ export function NewTaskModal({ date, onClose }: NewTaskModalProps) {
       setErrors(result.errors);
       return;
     }
-    addTask(result.value, date, result.repeat);
+    if (editing) updateTask(editing.source, editing.id, result.value);
+    else addTask(result.value, date, result.repeat);
     onClose();
   };
 
   return (
-    <Modal open title="New task" size="xl" onClosed={onClose} onAccept={submit}>
+    <Modal
+      open
+      title={editing ? "Edit task" : "New task"}
+      size="xl"
+      onClosed={onClose}
+      onAccept={submit}
+    >
       <Modal.Close />
       <div className="new-task">
         <Text>
@@ -138,13 +148,19 @@ export function NewTaskModal({ date, onClose }: NewTaskModalProps) {
           format={(option) => option}
           onChange={(option) => update("project", option)}
         />
-        <ChoiceRow
-          label="Repeat"
-          options={REPEAT_OPTIONS}
-          value={draft.repeat as (typeof REPEAT_OPTIONS)[number]}
-          format={(option) => REPEAT_LABELS[option]}
-          onChange={(option) => update("repeat", option)}
-        />
+        {editing ? (
+          editing.source === "series" ? (
+            <Text>Changes apply to all occurrences of this recurring task.</Text>
+          ) : null
+        ) : (
+          <ChoiceRow
+            label="Repeat"
+            options={REPEAT_OPTIONS}
+            value={draft.repeat as (typeof REPEAT_OPTIONS)[number]}
+            format={(option) => REPEAT_LABELS[option]}
+            onChange={(option) => update("repeat", option)}
+          />
+        )}
         <TextArea
           value={draft.notes}
           onChange={(value) => update("notes", value)}
@@ -155,7 +171,7 @@ export function NewTaskModal({ date, onClose }: NewTaskModalProps) {
         {errors.notes ? <Text role="alert">{errors.notes}</Text> : null}
       </div>
       <Modal.CloseButton>Cancel</Modal.CloseButton>
-      <Modal.ActionButton>Add task</Modal.ActionButton>
+      <Modal.ActionButton>{editing ? "Save" : "Add task"}</Modal.ActionButton>
     </Modal>
   );
 }

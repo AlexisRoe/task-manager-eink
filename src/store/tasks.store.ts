@@ -29,6 +29,8 @@ export interface TasksState extends PersistedTasks {
   recoveredFromCorruption: boolean;
   /** Creates a one-off task, or a recurring series when `repeat` is not `none`. */
   addTask: (input: TaskInput, date: IsoDate, repeat: RepeatOption) => void;
+  /** Replaces the editable fields of a one-off task or, for a series, of all its occurrences. */
+  updateTask: (source: TaskRef["source"], id: string, input: TaskInput) => void;
   /** Flips the done state of a task or occurrence. */
   toggleDone: (ref: TaskRef) => void;
   /** Moves a task to the next day, marking it as carried over. */
@@ -82,6 +84,13 @@ export function createTasksStore(storage: StateStorage = createIdbStorage()) {
             };
             return { series: [...state.series, series] };
           }),
+
+        updateTask: (source, id, input) =>
+          set((state) =>
+            source === "task"
+              ? { tasks: state.tasks.map((t) => (t.id === id ? { ...t, ...input } : t)) }
+              : { series: state.series.map((s) => (s.id === id ? { ...s, ...input } : s)) },
+          ),
 
         toggleDone: ({ source, id, date }) =>
           set((state) => {

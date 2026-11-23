@@ -4,7 +4,7 @@ import { TITLE_MAX_LENGTH } from "@/constants/task.constants";
 import { selectDayTasks } from "@/store/tasks.selectors";
 import { useTasksStore } from "@/store/tasks.store";
 import { resetUiStore, useUiStore } from "@/store/ui.store";
-import { makeSeries, seedTasks } from "@/test/fixtures.utils";
+import { makeSeries, makeTask, seedTasks } from "@/test/fixtures.utils";
 import { addDays, todayIso } from "@/utils/date.utils";
 
 const today = todayIso();
@@ -109,5 +109,26 @@ describe("Delete recurring modal", () => {
     await arrange();
     fireEvent.click(await screen.findByRole("button", { name: "Cancel" }));
     expect(selectDayTasks(useTasksStore.getState(), today)).toHaveLength(1);
+  });
+});
+
+describe("Edit task modal", () => {
+  it("edits a one-off task and keeps its state", async () => {
+    seedTasks({ tasks: [makeTask({ id: "t1", date: today, title: "Old", done: true })] });
+    render(<App />);
+    fireEvent.click(await screen.findByRole("button", { name: /Old/ }));
+    fireEvent.click(await screen.findByRole("button", { name: "Edit" }));
+    const title = await screen.findByRole("textbox", { name: /Title/ });
+    expect(title).toHaveValue("Old");
+    fireEvent.change(title, { target: { value: "New" } });
+    fireEvent.click(screen.getByRole("button", { name: "P1" }));
+    fireEvent.click(screen.getByRole("button", { name: "Save" }));
+    expect(useTasksStore.getState().tasks[0]).toMatchObject({
+      id: "t1",
+      title: "New",
+      priority: 1,
+      done: true,
+    });
+    expect(useUiStore.getState().modal).toEqual({ kind: "none" });
   });
 });

@@ -1,5 +1,6 @@
 import { DeleteRecurringModal } from "@/components/delete-recurring-modal.component";
 import { NewTaskModal } from "@/components/new-task-modal.component";
+import { useTasksStore } from "@/store/tasks.store";
 import { useUiStore } from "@/store/ui.store";
 import { todayIso } from "@/utils/date.utils";
 
@@ -9,10 +10,23 @@ export function ModalHost() {
   const view = useUiStore((state) => state.view);
   const date = useUiStore((state) => state.date);
   const close = useUiStore((state) => state.closeModal);
+  const tasks = useTasksStore((state) => state.tasks);
+  const series = useTasksStore((state) => state.series);
 
   switch (modal.kind) {
     case "new-task":
       return <NewTaskModal date={view === "history" ? todayIso() : date} onClose={close} />;
+    case "edit-task": {
+      const target = (modal.source === "task" ? tasks : series).find((t) => t.id === modal.id);
+      if (target === undefined) return null;
+      return (
+        <NewTaskModal
+          date={date}
+          onClose={close}
+          editing={{ source: modal.source, id: modal.id, task: target }}
+        />
+      );
+    }
     case "delete-recurring":
       return <DeleteRecurringModal seriesId={modal.seriesId} date={modal.date} onClose={close} />;
     case "none":

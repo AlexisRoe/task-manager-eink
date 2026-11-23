@@ -31,6 +31,7 @@ export function TaskList({ title, tasks, openRow, onToggleRow, actions }: TaskLi
               expanded={openRow === key}
               onToggleExpanded={() => onToggleRow(key)}
               onToggleDone={() => actions.toggleDone(task)}
+              onEdit={() => actions.edit(task)}
               onMoveToTomorrow={() => actions.moveToTomorrow(task)}
               onDelete={() => actions.remove(task)}
             />

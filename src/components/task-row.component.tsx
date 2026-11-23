@@ -11,6 +11,7 @@ export interface TaskRowProps {
   expanded: boolean;
   onToggleExpanded: () => void;
   onToggleDone: () => void;
+  onEdit: () => void;
   onMoveToTomorrow: () => void;
   onDelete: () => void;
 }
@@ -30,6 +31,7 @@ export function TaskRow({
   expanded,
   onToggleExpanded,
   onToggleDone,
+  onEdit,
   onMoveToTomorrow,
   onDelete,
 }: TaskRowProps) {
@@ -62,6 +64,7 @@ export function TaskRow({
         <div className="task-row__details">
           {task.notes === "" ? null : <Text>{task.notes}</Text>}
           <div className="task-row__actions">
+            <Button.Outlined onClick={onEdit}>Edit</Button.Outlined>
             <Button.Outlined onClick={onMoveToTomorrow}>Move to tomorrow</Button.Outlined>
             <Button.Outlined onClick={onDelete}>Delete</Button.Outlined>
           </div>
