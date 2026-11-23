@@ -1,6 +1,6 @@
 # Implementation Plan — Daybook
 
-> Roadmap for implementing `CONCEPT.md`. Design reference: `prototype/Daybook Planner.html` and `screenshots/`.
+> Implementation roadmap. Design reference: `prototype/Daybook Planner.html` and `screenshots/`.
 
 ## 0. Confirmed decisions
 - Persistence: zustand `persist` + IndexedDB (`idb-keyval`).
