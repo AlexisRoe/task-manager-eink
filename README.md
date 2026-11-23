@@ -21,7 +21,7 @@ This application was **reimplemented from a design prototype with security-by-de
 ## Features
 
 - **Day view**: hour timeline with a live "now" marker, the day's habits, scheduled and "Anytime" lists, expandable rows with notes, edit, move-to-tomorrow and delete. In portrait it shows one pane at a time and opens on the list.
-- **Week view**: Monday to Sunday columns with per-day progress, today highlighted, tap a day to open it. Habits are not shown here.
+- **Week view**: Monday to Sunday columns with per-day progress, today highlighted, tap a day to open it. Habits are not shown here in landscape; portrait adds a Tasks / Habits toggle that restricts the same view to one kind.
 - **History view**: 18-week completion heatmaps for tasks and for habits, plus a drill-down into any day where tasks and habits can still be checked off.
 - **Stats view**: habit streaks (current, longest, 30-day rate, always/never flags), weekly task trend, and completion by weekday, project and priority; portrait splits it into Habits and Tasks panes.
 - **About dialog**: tap "Daybook" in the header to see version, build commit and date, and to check for a new version on demand.
@@ -118,7 +118,7 @@ flowchart TD
 
 - **State:** tasks and habits are persisted to IndexedDB; transient UI state is kept separately and never persisted.
 - **Recurrence:** recurring tasks are stored as a series plus per-date occurrence state and materialized per day in the selectors; generated occurrences are never stored.
-- **Habits:** stored apart from tasks as a habit (active from its start date until it is deleted) plus the dates it was done, so they never mix into task lists, the Week view or task statistics. The limit of 7 active habits is enforced in the store ([ADR 0017](docs/decisions/0017-daily-habits.md)).
+- **Habits:** stored apart from tasks as a habit (active from its start date until it is deleted) plus the dates it was done, so they never mix into task lists or task statistics, and the Week view shows them only on their own portrait pane. The limit of 7 active habits is enforced in the store ([ADR 0017](docs/decisions/0017-daily-habits.md)).
 - **Dates:** local `YYYY-MM-DD` strings and `HH:MM` times handled by pure utilities, no date library.
 - **UI:** components come only from `e-ink-ui-lib` through `src/ui/index.ts`. Missing components are built as candidates in `src/ui/candidates/` (none at the moment) and contributed upstream. App CSS is layout only.
 - **PWA:** `vite-plugin-pwa` generates the service worker and manifest; `public/_headers` carries the CSP and security headers.

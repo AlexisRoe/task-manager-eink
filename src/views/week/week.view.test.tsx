@@ -1,9 +1,11 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { App } from "@/app/app.component";
+import { PORTRAIT_QUERY } from "@/config/pwa.config";
 import { selectDayStats } from "@/store/tasks.selectors";
 import { useTasksStore } from "@/store/tasks.store";
 import { resetUiStore, useUiStore } from "@/store/ui.store";
 import { makeHabit, makeSeries, makeTask, seedTasks } from "@/test/fixtures.utils";
+import { stubMatchMedia } from "@/test/match-media.utils";
 import { startOfWeek, todayIso } from "@/utils/date.utils";
 
 const today = todayIso();
@@ -49,8 +51,23 @@ describe("Week view", () => {
   });
 });
 
+afterEach(() => stubMatchMedia());
+
+describe("Week view habits in portrait", () => {
+  it("toggles between tasks and habits", async () => {
+    stubMatchMedia((query) => query === PORTRAIT_QUERY);
+    seedTasks({ habits: [makeHabit({ id: "h", title: "Stretch", startDate: monday })] });
+    render(<App />);
+    await screen.findByRole("heading", { name: /^Week/ });
+    expect(screen.queryByText("Stretch")).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Habits" }));
+    expect(screen.getAllByText("Stretch").length).toBeGreaterThan(0);
+    expect(screen.queryByText("Plan sprint")).not.toBeInTheDocument();
+  });
+});
+
 describe("Week view habits", () => {
-  it("never shows habits", async () => {
+  it("never shows habits in landscape", async () => {
     seedTasks({ habits: [makeHabit({ id: "h", title: "Stretch", startDate: monday })] });
     render(<App />);
     await screen.findByRole("heading", { name: /^Week/ });

@@ -1,19 +1,30 @@
-import type { WeekDay } from "@/hooks/week.hook";
-import type { DayTask } from "@/types/task.types";
+import type { IsoDate } from "@/types/task.types";
 import { Button, Checkbox, Inverted, Label, ProgressBar, Text } from "@/ui";
 import { dayOfMonth, formatWeekdayShort } from "@/utils/date.utils";
 
+/** A checkable entry of a week column, whether task or habit. */
+export interface WeekItem {
+  key: string;
+  title: string;
+  /** Start time or "Anytime"; omitted for entries without a time such as habits. */
+  time?: string;
+  done: boolean;
+  disabled?: boolean;
+  ariaLabel: string;
+  onToggle: () => void;
+}
+
 /** Props of {@link WeekColumn}. */
 export interface WeekColumnProps {
-  day: WeekDay;
+  day: { date: IsoDate; done: number; total: number };
+  items: readonly WeekItem[];
   isToday: boolean;
   isPast: boolean;
   onOpenDay: () => void;
-  onToggle: (task: DayTask) => void;
 }
 
-/** One day of the week: heading that opens the day, progress, and checkable task items. */
-export function WeekColumn({ day, isToday, isPast, onOpenDay, onToggle }: WeekColumnProps) {
+/** One day of the week: heading that opens the day, progress, and checkable items. */
+export function WeekColumn({ day, items, isToday, isPast, onOpenDay }: WeekColumnProps) {
   const percent = day.total === 0 ? 0 : (day.done / day.total) * 100;
   return (
     <Inverted active={isToday} className="week-column" data-past={isPast && !isToday}>
@@ -34,16 +45,19 @@ export function WeekColumn({ day, isToday, isPast, onOpenDay, onToggle }: WeekCo
         </Text>
       </div>
       <ul className="week-column__items">
-        {day.tasks.map((task) => (
-          <li key={`${task.source}:${task.id}`} className="week-column__item" data-done={task.done}>
+        {items.map((item) => (
+          <li key={item.key} className="week-column__item" data-done={item.done}>
             <Checkbox
-              checked={task.done}
-              onChange={() => onToggle(task)}
-              aria-label={`Mark "${task.title}" as done`}
+              checked={item.done}
+              disabled={item.disabled === true}
+              onChange={item.onToggle}
+              aria-label={item.ariaLabel}
             >
               <span className="week-column__item-text">
-                <span className="week-column__item-time">{task.start ?? "Anytime"}</span>
-                <span className="week-column__item-title">{task.title}</span>
+                {item.time === undefined ? null : (
+                  <span className="week-column__item-time">{item.time}</span>
+                )}
+                <span className="week-column__item-title">{item.title}</span>
               </span>
             </Checkbox>
           </li>
