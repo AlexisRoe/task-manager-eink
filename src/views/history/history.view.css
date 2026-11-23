@@ -64,8 +64,4 @@
     grid-template-rows: auto minmax(0, 1fr);
     gap: var(--eink-size-24);
   }
-
-  .history-view__stats {
-    margin-top: 0;
-  }
 }

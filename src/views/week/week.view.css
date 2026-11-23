@@ -94,17 +94,26 @@
 @media (orientation: portrait) {
   .week-view__columns {
     grid-template-columns: 1fr;
-    grid-template-rows: repeat(7, minmax(0, 1fr));
+    grid-auto-rows: auto;
+    align-content: start;
+    overflow-y: auto;
   }
 
   .week-column {
     display: grid;
     grid-template-columns: var(--eink-size-64) var(--eink-size-128) 1fr;
-    align-items: center;
-    gap: var(--eink-size-16);
+    align-items: start;
+    gap: var(--eink-size-8) var(--eink-size-32);
+    min-height: auto;
+  }
+
+  .week-column__header,
+  .week-column__progress,
+  .week-column__items {
+    align-self: start;
   }
 
   .week-column__items {
-    max-height: 100%;
+    overflow-y: visible;
   }
 }
