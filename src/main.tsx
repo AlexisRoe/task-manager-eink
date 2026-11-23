@@ -1,6 +1,7 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { App } from "@/app/app.component";
+import { registerServiceWorker } from "@/utils/service-worker.utils";
 
 const root = document.getElementById("root");
 if (root) {
@@ -11,6 +12,7 @@ if (root) {
   );
 }
 
+void registerServiceWorker();
 void navigator.storage?.persist?.();
 
 if (import.meta.env.DEV) {

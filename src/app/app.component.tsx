@@ -1,7 +1,6 @@
 import "./app.css";
 import { AppHeader } from "@/components/app-header.component";
 import { ModalHost } from "@/components/modal-host.component";
-import { UpdatePrompt } from "@/components/update-prompt.component";
 import { useTasksHydrated } from "@/hooks/tasks-hydration.hook";
 import { useTasksStore } from "@/store/tasks.store";
 import { useUiStore } from "@/store/ui.store";
@@ -46,7 +45,6 @@ function Planner() {
         </div>
       ) : null}
       <ModalHost />
-      <UpdatePrompt />
       <main className="app__main">
         {view === "day" ? <DayView /> : null}
         {view === "week" ? <WeekView /> : null}
