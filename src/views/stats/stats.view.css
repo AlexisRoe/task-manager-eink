@@ -61,7 +61,7 @@
   .stats-view {
     grid-template-columns: 1fr;
     grid-template-rows: auto auto minmax(0, 1fr);
-    gap: var(--eink-size-16);
+    gap: var(--eink-size-24);
   }
 
   .stats-view__headline {

@@ -1,7 +1,7 @@
 .day-view {
   display: flex;
   flex-direction: column;
-  gap: var(--eink-size-16);
+  gap: var(--eink-size-24);
   height: 100%;
 }
 

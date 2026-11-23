@@ -1,7 +1,7 @@
 .history-view {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: var(--eink-size-32);
+  gap: var(--eink-size-24) var(--eink-size-32);
   height: 100%;
 }
 
