@@ -8,7 +8,7 @@ Daybook locked the manifest to landscape and showed a "rotate device" screen in 
 ## Decision
 The manifest uses `orientation: "any"` and `StandaloneGate` only enforces standalone display. Layout adapts through `@media (orientation: portrait)` rules (landscape and portrait only, no width breakpoints):
 - Header: three rows (brand and "New task", full-width view switch, date navigation).
-- Day: one pane at a time, switched with a Timeline / List `Segmented` control. `useIsPortrait` (`hooks/orientation.hook.ts`) drives it because the choice needs state.
+- Day: one pane at a time, switched with a "List" `Toggle` at the end of the heading line (on = list, the default; off = timeline); see also [ADR 0020](0020-week-view-habits-switch.md) for the matching Week switch. `useIsPortrait` (`hooks/orientation.hook.ts`) drives it because the choice needs state.
 - Week: seven stacked day rows that grow to show every task; the view scrolls.
 - History: one pane at a time (Statistics / Day). Selecting a heatmap cell switches to the Day pane so the choice gives immediate feedback.
 

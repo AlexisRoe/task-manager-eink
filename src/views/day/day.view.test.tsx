@@ -114,7 +114,7 @@ describe("Day view", () => {
 
   it("shows both panes and no toggle in landscape", async () => {
     await renderDay();
-    expect(screen.queryByRole("button", { name: "Timeline" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("switch", { name: "List" })).not.toBeInTheDocument();
     expect(screen.getByRole("region", { name: "Scheduled" })).toBeInTheDocument();
     expect(screen.getAllByRole("button", { name: "Draft roadmap" }).length).toBeGreaterThan(0);
   });
@@ -124,9 +124,9 @@ describe("Day view", () => {
     await renderDay();
     expect(screen.getByRole("region", { name: "Scheduled" })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Draft roadmap" })).not.toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Timeline" }));
+    fireEvent.click(screen.getByRole("switch", { name: "List" }));
     expect(screen.queryByRole("region", { name: "Scheduled" })).not.toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "List" }));
+    fireEvent.click(screen.getByRole("switch", { name: "List" }));
     expect(screen.getByRole("region", { name: "Scheduled" })).toBeInTheDocument();
   });
 

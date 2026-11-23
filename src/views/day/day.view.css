@@ -16,6 +16,9 @@
 }
 
 .day-view__progress {
+  display: flex;
+  align-items: center;
+  gap: var(--eink-size-16);
   margin-left: auto;
 }
 
