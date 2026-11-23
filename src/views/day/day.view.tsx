@@ -75,14 +75,6 @@ export function DayView() {
 
   return (
     <div className="day-view">
-      <div className="day-view__heading">
-        <Title size="1">{formatWeekdayLong(date)}</Title>
-        <Text as="span">{formatFullDate(date)}</Text>
-        {date === today ? <Pill size="sm">Today</Pill> : null}
-        <Text as="span" className="day-view__progress">
-          {done} of {total} done
-        </Text>
-      </div>
       {portrait ? (
         <Segmented
           className="day-view__panes"
@@ -99,6 +91,14 @@ export function DayView() {
           ))}
         </Segmented>
       ) : null}
+      <div className="day-view__heading">
+        <Title size="1">{formatWeekdayLong(date)}</Title>
+        <Text as="span">{formatFullDate(date)}</Text>
+        {date === today ? <Pill size="sm">Today</Pill> : null}
+        <Text as="span" className="day-view__progress">
+          {done} of {total} done
+        </Text>
+      </div>
       <div className="day-view__columns" data-portrait={portrait}>
         {showTimeline ? (
           <TimeGrid
