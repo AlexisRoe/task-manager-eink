@@ -1,5 +1,5 @@
 import "./day.view.css";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import {
   CARRY_PROMPT_ENABLED,
   DAY_END_HOUR,
@@ -7,14 +7,16 @@ import {
   HOUR_HEIGHT_PX,
   MIN_BLOCK_HEIGHT_PX,
 } from "@/config/app.config";
+import { DAY_PANES, type DayPane, DEFAULT_DAY_PANE, isDayPane } from "@/constants/day.constants";
 import { useDayData } from "@/hooks/day.hook";
 import { useNow } from "@/hooks/now.hook";
+import { useIsPortrait } from "@/hooks/orientation.hook";
 import { rowKey, useTaskActions } from "@/hooks/task-actions.hook";
 import { timelineScroll } from "@/hooks/timeline-scroll.hook";
 import { selectCarryOverCandidates, selectShowCarryOver } from "@/store/tasks.selectors";
 import { useTasksStore } from "@/store/tasks.store";
 import { useUiStore } from "@/store/ui.store";
-import { Pill, Text, TimeGrid, type TimeGridItem, Title } from "@/ui";
+import { Pill, Segmented, Text, TimeGrid, type TimeGridItem, Title } from "@/ui";
 import { formatFullDate, formatWeekdayLong, todayIso } from "@/utils/date.utils";
 import { minutesOfDay, toMinutes } from "@/utils/time.utils";
 import { CarryOverBanner } from "./carry-over-banner.component";
@@ -29,6 +31,10 @@ export function DayView() {
   const today = todayIso(now);
   const { scheduled, anytime, done, total } = useDayData(date);
   const actions = useTaskActions();
+  const portrait = useIsPortrait();
+  const [pane, setPane] = useState<DayPane>(DEFAULT_DAY_PANE);
+  const showTimeline = !portrait || pane === "timeline";
+  const showLists = !portrait || pane === "list";
 
   const tasks = useTasksStore((state) => state.tasks);
   const carryDismissedOn = useTasksStore((state) => state.carryDismissedOn);
@@ -72,41 +78,61 @@ export function DayView() {
           {done} of {total} done
         </Text>
       </div>
-      <div className="day-view__columns">
-        <TimeGrid
-          className="day-view__timeline"
-          startHour={DAY_START_HOUR}
-          endHour={DAY_END_HOUR}
-          hourHeight={HOUR_HEIGHT_PX}
-          minBlockHeight={MIN_BLOCK_HEIGHT_PX}
-          items={items}
-          scrollToMinutes={scroll.scrollToMinutes}
-          scrollKey={scroll.scrollKey}
-          {...(date === today ? { nowMinutes: minutesOfDay(now) } : {})}
-        />
-        <div className="day-view__lists">
-          {showCarry ? (
-            <CarryOverBanner
-              count={carryCount}
-              onMove={() => carryOverToToday(today)}
-              onLeave={() => dismissCarryOver(today)}
+      {portrait ? (
+        <Segmented
+          className="day-view__panes"
+          value={pane}
+          onChange={(id) => {
+            if (isDayPane(id)) setPane(id);
+          }}
+          aria-label="Day layout"
+        >
+          {DAY_PANES.map(({ id, label }) => (
+            <Segmented.Item key={id} id={id}>
+              {label}
+            </Segmented.Item>
+          ))}
+        </Segmented>
+      ) : null}
+      <div className="day-view__columns" data-portrait={portrait}>
+        {showTimeline ? (
+          <TimeGrid
+            className="day-view__timeline"
+            startHour={DAY_START_HOUR}
+            endHour={DAY_END_HOUR}
+            hourHeight={HOUR_HEIGHT_PX}
+            minBlockHeight={MIN_BLOCK_HEIGHT_PX}
+            items={items}
+            scrollToMinutes={scroll.scrollToMinutes}
+            scrollKey={scroll.scrollKey}
+            {...(date === today ? { nowMinutes: minutesOfDay(now) } : {})}
+          />
+        ) : null}
+        {showLists ? (
+          <div className="day-view__lists">
+            {showCarry ? (
+              <CarryOverBanner
+                count={carryCount}
+                onMove={() => carryOverToToday(today)}
+                onLeave={() => dismissCarryOver(today)}
+              />
+            ) : null}
+            <TaskList
+              title="Scheduled"
+              tasks={scheduled}
+              openRow={openRow}
+              onToggleRow={toggleRow}
+              actions={actions}
             />
-          ) : null}
-          <TaskList
-            title="Scheduled"
-            tasks={scheduled}
-            openRow={openRow}
-            onToggleRow={toggleRow}
-            actions={actions}
-          />
-          <TaskList
-            title="Anytime"
-            tasks={anytime}
-            openRow={openRow}
-            onToggleRow={toggleRow}
-            actions={actions}
-          />
-        </div>
+            <TaskList
+              title="Anytime"
+              tasks={anytime}
+              openRow={openRow}
+              onToggleRow={toggleRow}
+              actions={actions}
+            />
+          </div>
+        ) : null}
       </div>
     </div>
   );

@@ -90,3 +90,21 @@
 .week-column__item[data-done="true"] .week-column__item-title {
   text-decoration: line-through;
 }
+
+@media (orientation: portrait) {
+  .week-view__columns {
+    grid-template-columns: 1fr;
+    grid-template-rows: repeat(7, minmax(0, 1fr));
+  }
+
+  .week-column {
+    display: grid;
+    grid-template-columns: var(--eink-size-64) var(--eink-size-128) 1fr;
+    align-items: center;
+    gap: var(--eink-size-16);
+  }
+
+  .week-column__items {
+    max-height: 100%;
+  }
+}

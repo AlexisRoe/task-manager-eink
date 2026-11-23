@@ -1,6 +1,6 @@
 # 0008. Standalone and landscape gate
 
-Date: 2026-11-19 · Status: accepted
+Date: 2026-11-19 · Status: accepted (landscape enforcement superseded by [0016](0016-portrait-support.md))
 
 ## Context
 The app is designed for installed, landscape use on e-ink tablets.

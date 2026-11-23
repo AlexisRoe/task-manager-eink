@@ -1,12 +1,16 @@
 import { fireEvent, render, screen, within } from "@testing-library/react";
 import { App } from "@/app/app.component";
+import { PORTRAIT_QUERY } from "@/config/pwa.config";
 import { useTasksStore } from "@/store/tasks.store";
 import { resetUiStore, useUiStore } from "@/store/ui.store";
 import { makeSeries, makeTask, seedTasks } from "@/test/fixtures.utils";
+import { stubMatchMedia } from "@/test/match-media.utils";
 import { addDays, todayIso } from "@/utils/date.utils";
 
 const today = todayIso();
 const yesterday = addDays(today, -1);
+
+afterEach(() => stubMatchMedia());
 
 beforeEach(() => {
   resetUiStore();
@@ -106,6 +110,21 @@ describe("Day view", () => {
     await renderDay();
     fireEvent.click(screen.getByRole("button", { name: "Draft roadmap" }));
     expect(screen.getByText("Send to Lena")).toBeInTheDocument();
+  });
+
+  it("shows both panes and no toggle in landscape", async () => {
+    await renderDay();
+    expect(screen.queryByRole("button", { name: "Timeline" })).not.toBeInTheDocument();
+    expect(screen.getByRole("region", { name: "Scheduled" })).toBeInTheDocument();
+    expect(screen.getAllByRole("button", { name: "Draft roadmap" }).length).toBeGreaterThan(0);
+  });
+
+  it("shows one pane at a time in portrait", async () => {
+    stubMatchMedia((query) => query === PORTRAIT_QUERY);
+    await renderDay();
+    expect(screen.queryByRole("region", { name: "Scheduled" })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "List" }));
+    expect(screen.getByRole("region", { name: "Scheduled" })).toBeInTheDocument();
   });
 
   it("hides the today pill and banner on other days", async () => {

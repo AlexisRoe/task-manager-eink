@@ -15,7 +15,7 @@
 - `wrangler.jsonc` uses Workers static assets (SPA fallback), not classic Pages; `public/_headers` works with both.
 
 ## 1. Goal
-Landscape-only, standalone-only PWA task planner for e-ink tablets, recreating the prototype's Day / Week / History views and New-task flow with `e-ink-ui-lib` components. All data stays on-device (IndexedDB). Security-by-design across code, deps, tooling and CI.
+Standalone-only PWA (landscape and portrait, see ADR 0016) task planner for e-ink tablets, recreating the prototype's Day / Week / History views and New-task flow with `e-ink-ui-lib` components. All data stays on-device (IndexedDB). Security-by-design across code, deps, tooling and CI.
 
 ## 2. Tech stack
 React 19 · TypeScript (strict, `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`) · Vite · vite-plugin-pwa (Workbox `generateSW`, precache-only) · zustand + `persist` + idb-keyval · Vitest + Testing Library + jsdom + fake-indexeddb · Biome (same config as ui-lib) · e-ink-ui-lib.
@@ -123,9 +123,9 @@ Candidate workflow: same file layout as the lib (`<name>.component.tsx`, `.compo
 - `SECURITY.md` with reporting policy and the threat model summary.
 
 ## 9. PWA
-- vite-plugin-pwa with the manifest from `resources/manifest.json`, extended with `orientation: "landscape"`, `display: "standalone"`, name "Daybook", proper description; icons copied to `public/icons/`, `favicon.ico` to `public/`.
+- vite-plugin-pwa with the manifest from `resources/manifest.json`, extended with `orientation: "any"`, `display: "standalone"`, name "Daybook", proper description; icons copied to `public/icons/`, `favicon.ico` to `public/`.
 - `index.html` gets the meta tags from `resources/meta-tags.html` minus the splash links and minus the manifest link (the plugin injects it).
-- **Standalone gate:** in production, if `matchMedia('(display-mode: standalone)')` is false, render an install-instructions screen; portrait shows a "rotate device" screen. Dev bypasses the gate.
+- **Standalone gate:** in production, if `matchMedia('(display-mode: standalone)')` is false, render an install-instructions screen. Dev bypasses the gate.
 - Update flow: `registerType: "prompt"` → lib `Notification` offers a reload.
 
 ## 10. Documentation
@@ -139,7 +139,7 @@ Candidate workflow: same file layout as the lib (`<name>.component.tsx`, `.compo
 1. **Domain:** types, constants, config, date/time/recurrence/history/validate utils with exhaustive unit tests (DST, week boundaries, ISO week 1/53, month labels).
 2. **Store:** IDB storage adapter, tasks store + actions, selectors, migrations/validation; tests with fake-indexeddb.
 3. **UI facade + candidates:** `src/ui/index.ts`; Segmented-controlled, TimeGrid, Heatmap, inverted surface (+ TimeInput-clear if needed), each with tests + README.
-4. **Shell:** ThemeProvider, ModalProvider, header, segmented tabs, date nav, standalone gate, ui store, layout CSS (fixed 1248×936 reference, scales to landscape viewport).
+4. **Shell:** ThemeProvider, ModalProvider, header, segmented tabs, date nav, standalone gate, ui store, layout CSS (fluid, adapts to landscape and portrait).
 5. **Day view:** timeline, scheduled/anytime sections, expandable rows, carry-over banner, now tick + auto-scroll.
 6. **Modals:** New task, delete-recurring.
 7. **Week view.**
@@ -152,5 +152,5 @@ Candidate workflow: same file layout as the lib (`<name>.component.tsx`, `.compo
 - `npm run check` (lint + typecheck + tests with coverage ≥ 80 % + build) passes at every phase.
 - Component tests per view: toggling, move to tomorrow, delete (both recurring options), carry-over, nav, view switching, validation errors in the modal.
 - Visual parity: `npm run dev` with the dev seed, compare each view against `screenshots/*.png` at 1248×936.
-- `npm run build && npm run preview`: install the PWA in Chromium, confirm standalone + landscape, reload offline, DevTools Network shows **zero** third-party requests, Console shows no CSP violations, data survives reload and browser restart (IndexedDB).
+- `npm run build && npm run preview`: install the PWA in Chromium, confirm standalone in landscape and portrait, reload offline, DevTools Network shows **zero** third-party requests, Console shows no CSP violations, data survives reload and browser restart (IndexedDB).
 - CI green on a test PR; Dependabot + CodeQL active.

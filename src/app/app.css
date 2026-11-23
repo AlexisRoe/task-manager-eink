@@ -46,6 +46,33 @@ body {
   justify-content: flex-end;
 }
 
+@media (orientation: portrait) {
+  .app {
+    padding: var(--eink-size-16);
+  }
+
+  .app-header {
+    grid-template-columns: 1fr auto;
+    gap: var(--eink-size-16);
+  }
+
+  .app-header > :nth-child(1) {
+    grid-area: 1 / 1;
+  }
+
+  .app-header > :nth-child(4) {
+    grid-area: 1 / 2;
+  }
+
+  .app-header > :nth-child(2) {
+    grid-area: 2 / 1;
+  }
+
+  .app-header > :nth-child(3) {
+    grid-area: 2 / 2;
+  }
+}
+
 .date-nav {
   display: flex;
   align-items: center;
