@@ -57,7 +57,7 @@ body {
   }
 
   .app-header {
-    grid-template-columns: 1fr auto;
+    grid-template-columns: auto 1fr auto;
     gap: var(--eink-size-16);
   }
 
@@ -65,21 +65,17 @@ body {
     grid-area: 1 / 1;
   }
 
-  .app-header > :nth-child(4) {
+  .app-header > :nth-child(3) {
     grid-area: 1 / 2;
+    justify-content: center;
+  }
+
+  .app-header > :nth-child(4) {
+    grid-area: 1 / 3;
   }
 
   .app-header > :nth-child(2) {
     grid-area: 2 / 1 / 3 / -1;
-  }
-
-  .app-header > :nth-child(3) {
-    grid-area: 3 / 1 / 4 / -1;
-    justify-content: center;
-  }
-
-  .app-header__nav:empty {
-    display: none;
   }
 }
 
