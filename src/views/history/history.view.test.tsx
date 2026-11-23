@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, within } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { App } from "@/app/app.component";
 import { PORTRAIT_QUERY } from "@/config/pwa.config";
 import { useTasksStore } from "@/store/tasks.store";
@@ -64,12 +64,11 @@ describe("History view", () => {
     expect(
       await screen.findByLabelText("Task completion of the last 18 weeks"),
     ).toBeInTheDocument();
-    expect(screen.queryByText("SELECTED DAY")).not.toBeInTheDocument();
-    const toggle = within(screen.getByLabelText("History layout"));
-    fireEvent.click(toggle.getByRole("button", { name: "Day" }));
-    expect(screen.getByText("SELECTED DAY")).toBeInTheDocument();
+    expect(screen.queryByText("Selected day")).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("switch", { name: "Heatmaps" }));
+    expect(screen.getByText("Selected day")).toBeInTheDocument();
     expect(screen.queryByLabelText("Task completion of the last 18 weeks")).not.toBeInTheDocument();
-    fireEvent.click(toggle.getByRole("button", { name: "Heatmaps" }));
+    fireEvent.click(screen.getByRole("switch", { name: "Heatmaps" }));
     const yesterday = addDays(today, -1);
     const cell = screen
       .getAllByRole("button", { pressed: false })
@@ -82,7 +81,7 @@ describe("History view", () => {
 
   it("hides future cells", async () => {
     render(<App />);
-    await screen.findByText("SELECTED DAY");
+    await screen.findByText("Selected day");
     const labels = screen
       .getAllByRole("button")
       .map((button) => button.getAttribute("aria-label") ?? "");

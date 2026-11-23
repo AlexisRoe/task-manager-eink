@@ -1,7 +1,7 @@
 .day-view {
   display: flex;
   flex-direction: column;
-  gap: var(--eink-size-16);
+  gap: var(--eink-size-24);
   height: 100%;
 }
 
@@ -16,6 +16,9 @@
 }
 
 .day-view__progress {
+  display: flex;
+  align-items: center;
+  gap: var(--eink-size-16);
   margin-left: auto;
 }
 
@@ -44,7 +47,7 @@
 .day-view__lists {
   display: flex;
   flex-direction: column;
-  gap: var(--eink-size-24);
+  gap: var(--eink-size-48);
   min-height: 0;
   overflow-y: auto;
 }
@@ -62,7 +65,13 @@
 
 .task-list__header {
   display: flex;
+  align-items: baseline;
   justify-content: space-between;
+  margin-bottom: var(--eink-size-8);
+}
+
+.task-list__header > h3 {
+  margin: 0;
 }
 
 .task-list__items {

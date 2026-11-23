@@ -1,6 +1,6 @@
 import { habitRowKey } from "@/hooks/habits.hook";
 import type { DayHabit } from "@/types/task.types";
-import { Button, Checkbox, Label } from "@/ui";
+import { Button, Checkbox, Title } from "@/ui";
 
 /** Props of {@link HabitList}. */
 export interface HabitListProps {
@@ -29,10 +29,10 @@ export function HabitList({
   return (
     <section className="task-list" aria-label="Habits">
       <div className="task-list__header">
-        <Label>HABITS</Label>
-        <Label>
+        <Title size="3">Habits</Title>
+        <Title size="3">
           {done}/{habits.length}
-        </Label>
+        </Title>
       </div>
       <ul className="task-list__items">
         {habits.map((habit) => {

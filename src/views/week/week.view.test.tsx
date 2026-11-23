@@ -49,11 +49,15 @@ describe("Week view", () => {
   });
 });
 
-describe("Week view habits", () => {
-  it("never shows habits", async () => {
+describe("Week view habits toggle", () => {
+  it("switches the same columns between tasks and habits", async () => {
     seedTasks({ habits: [makeHabit({ id: "h", title: "Stretch", startDate: monday })] });
     render(<App />);
     await screen.findByRole("heading", { name: /^Week/ });
     expect(screen.queryByText("Stretch")).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("switch", { name: "Habits" }));
+    expect(screen.getAllByText("Stretch").length).toBeGreaterThan(0);
+    expect(screen.queryByText("Plan sprint")).not.toBeInTheDocument();
+    expect(screen.getAllByRole("button", { name: /^Open / })).toHaveLength(7);
   });
 });

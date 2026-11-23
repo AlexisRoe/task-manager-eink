@@ -7,7 +7,6 @@ import {
   HOUR_HEIGHT_PX,
   MIN_BLOCK_HEIGHT_PX,
 } from "@/config/app.config";
-import { DAY_PANES, type DayPane, DEFAULT_DAY_PANE, isDayPane } from "@/constants/day.constants";
 import { useDayData } from "@/hooks/day.hook";
 import { useDayHabits, useToggleHabit } from "@/hooks/habits.hook";
 import { useNow } from "@/hooks/now.hook";
@@ -17,7 +16,7 @@ import { timelineScroll } from "@/hooks/timeline-scroll.hook";
 import { selectCarryOverCandidates, selectShowCarryOver } from "@/store/tasks.selectors";
 import { useTasksStore } from "@/store/tasks.store";
 import { useUiStore } from "@/store/ui.store";
-import { Pill, Segmented, Text, TimeGrid, type TimeGridItem, Title } from "@/ui";
+import { Pill, Text, TimeGrid, type TimeGridItem, Title, Toggle } from "@/ui";
 import { formatFullDate, formatWeekdayLong, todayIso } from "@/utils/date.utils";
 import { minutesOfDay, toMinutes } from "@/utils/time.utils";
 import { CarryOverBanner } from "./carry-over-banner.component";
@@ -37,9 +36,9 @@ export function DayView() {
   const toggleHabit = useToggleHabit();
   const openModal = useUiStore((state) => state.openModal);
   const portrait = useIsPortrait();
-  const [pane, setPane] = useState<DayPane>(DEFAULT_DAY_PANE);
-  const showTimeline = !portrait || pane === "timeline";
-  const showLists = !portrait || pane === "list";
+  const [listOnly, setListOnly] = useState(true);
+  const showTimeline = !portrait || !listOnly;
+  const showLists = !portrait || listOnly;
 
   const tasks = useTasksStore((state) => state.tasks);
   const carryDismissedOn = useTasksStore((state) => state.carryDismissedOn);
@@ -75,29 +74,20 @@ export function DayView() {
 
   return (
     <div className="day-view">
-      {portrait ? (
-        <Segmented
-          className="day-view__panes"
-          value={pane}
-          onChange={(id) => {
-            if (isDayPane(id)) setPane(id);
-          }}
-          aria-label="Day layout"
-        >
-          {DAY_PANES.map(({ id, label }) => (
-            <Segmented.Item key={id} id={id}>
-              {label}
-            </Segmented.Item>
-          ))}
-        </Segmented>
-      ) : null}
       <div className="day-view__heading">
         <Title size="1">{formatWeekdayLong(date)}</Title>
         <Text as="span">{formatFullDate(date)}</Text>
         {date === today ? <Pill size="sm">Today</Pill> : null}
-        <Text as="span" className="day-view__progress">
-          {done} of {total} done
-        </Text>
+        <div className="day-view__progress">
+          <Text as="span">
+            {done} of {total} done
+          </Text>
+          {portrait ? (
+            <Toggle checked={listOnly} onChange={setListOnly}>
+              List
+            </Toggle>
+          ) : null}
+        </div>
       </div>
       <div className="day-view__columns" data-portrait={portrait}>
         {showTimeline ? (

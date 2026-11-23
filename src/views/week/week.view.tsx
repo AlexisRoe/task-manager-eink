@@ -1,19 +1,25 @@
 import "./week.view.css";
+import { useState } from "react";
+import { useToggleHabit } from "@/hooks/habits.hook";
 import { useNow } from "@/hooks/now.hook";
 import { useTaskActions } from "@/hooks/task-actions.hook";
-import { useWeekData } from "@/hooks/week.hook";
+import { useWeekData, useWeekHabitData } from "@/hooks/week.hook";
 import { useUiStore } from "@/store/ui.store";
-import { Text, Title } from "@/ui";
+import { Text, Title, Toggle } from "@/ui";
 import { formatDate, isoWeekNumber, todayIso } from "@/utils/date.utils";
-import { WeekColumn } from "./week-column.component";
+import { WeekColumn, type WeekItem } from "./week-column.component";
 
 /** The Week view: Monday to Sunday columns with progress and checkable tasks per day. */
 export function WeekView() {
   const date = useUiStore((state) => state.date);
   const openDay = useUiStore((state) => state.openDay);
   const today = todayIso(useNow());
-  const { days, done, total } = useWeekData(date);
+  const taskData = useWeekData(date);
+  const habitData = useWeekHabitData(date);
   const { toggleDone } = useTaskActions();
+  const toggleHabit = useToggleHabit();
+  const [showHabits, setShowHabits] = useState(false);
+  const { days, done, total } = showHabits ? habitData : taskData;
   const first = days[0]?.date ?? date;
   const last = days[days.length - 1]?.date ?? date;
   const sameMonth = formatDate(first, { month: "long" }) === formatDate(last, { month: "long" });
@@ -21,24 +27,51 @@ export function WeekView() {
     ? `${formatDate(first, { day: "numeric" })} – ${formatDate(last, { day: "numeric", month: "long", year: "numeric" })}`
     : `${formatDate(first, { day: "numeric", month: "long" })} – ${formatDate(last, { day: "numeric", month: "long", year: "numeric" })}`;
 
+  const itemsOf = (index: number): WeekItem[] => {
+    if (showHabits) {
+      const day = habitData.days[index];
+      return (day?.habits ?? []).map((habit) => ({
+        key: `habit:${habit.id}`,
+        title: habit.title,
+        done: habit.done,
+        disabled: habit.date > today,
+        ariaLabel: `Mark habit "${habit.title}" as done`,
+        onToggle: () => toggleHabit(habit),
+      }));
+    }
+    return (taskData.days[index]?.tasks ?? []).map((task) => ({
+      key: `${task.source}:${task.id}`,
+      title: task.title,
+      time: task.start ?? "Anytime",
+      done: task.done,
+      ariaLabel: `Mark "${task.title}" as done`,
+      onToggle: () => toggleDone(task),
+    }));
+  };
+
   return (
     <div className="week-view">
       <div className="week-view__heading">
         <Title size="1">Week {isoWeekNumber(date)}</Title>
         <Text as="span">{range}</Text>
-        <Text as="span" className="week-view__progress">
-          {done} of {total} done
-        </Text>
+        <div className="week-view__progress">
+          <Text as="span">
+            {done} of {total} done
+          </Text>
+          <Toggle checked={showHabits} onChange={setShowHabits}>
+            Habits
+          </Toggle>
+        </div>
       </div>
       <div className="week-view__columns">
-        {days.map((day) => (
+        {days.map((day, index) => (
           <WeekColumn
             key={day.date}
             day={day}
+            items={itemsOf(index)}
             isToday={day.date === today}
             isPast={day.date < today}
             onOpenDay={() => openDay(day.date)}
-            onToggle={toggleDone}
           />
         ))}
       </div>

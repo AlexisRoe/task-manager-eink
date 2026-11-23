@@ -1,7 +1,8 @@
 .history-view {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: var(--eink-size-32);
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: var(--eink-size-24) var(--eink-size-32);
   height: 100%;
 }
 
@@ -20,6 +21,7 @@
 }
 
 .history-view__heading {
+  grid-column: 1 / -1;
   display: flex;
   align-items: baseline;
   gap: var(--eink-size-16);
@@ -27,6 +29,12 @@
 
 .history-view__heading > h1 {
   margin: 0;
+}
+
+.history-view__toggle {
+  display: flex;
+  align-items: center;
+  margin-left: auto;
 }
 
 .history-view__selected {
