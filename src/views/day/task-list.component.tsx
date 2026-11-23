@@ -2,7 +2,7 @@ import { TaskRow } from "@/components/task-row.component";
 import type { TaskActions } from "@/hooks/task-actions.hook";
 import { rowKey } from "@/hooks/task-actions.hook";
 import type { DayTask } from "@/types/task.types";
-import { Label } from "@/ui";
+import { Title } from "@/ui";
 
 /** Props of {@link TaskList}. */
 export interface TaskListProps {
@@ -18,8 +18,8 @@ export function TaskList({ title, tasks, openRow, onToggleRow, actions }: TaskLi
   return (
     <section className="task-list" aria-label={title}>
       <div className="task-list__header">
-        <Label>{title.toUpperCase()}</Label>
-        <Label>{tasks.length}</Label>
+        <Title size="3">{title}</Title>
+        <Title size="3">{tasks.length}</Title>
       </div>
       <ul className="task-list__items">
         {tasks.map((task) => {

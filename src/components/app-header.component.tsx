@@ -25,6 +25,7 @@ export function AppHeader() {
   return (
     <header className="app-header">
       <Button.Naked
+        className="app-header__brand"
         size="xl"
         aria-label={`About ${APP_NAME}`}
         onClick={() => openModal({ kind: "about" })}

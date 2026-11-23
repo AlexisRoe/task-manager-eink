@@ -3,8 +3,8 @@ export type DayPane = "timeline" | "list";
 
 /** Portrait toggle options of the Day view, in display order. */
 export const DAY_PANES: readonly { id: DayPane; label: string }[] = [
-  { id: "timeline", label: "Timeline" },
   { id: "list", label: "List" },
+  { id: "timeline", label: "Timeline" },
 ];
 
 /** Pane shown first when the Day view is opened in portrait. */

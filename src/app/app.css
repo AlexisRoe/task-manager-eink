@@ -41,6 +41,15 @@ body {
   gap: var(--eink-size-32);
 }
 
+.app-header .app-header__brand.app-header__brand {
+  height: auto;
+  min-height: 0;
+  padding: 0;
+  font-size: var(--eink-size-20);
+  font-weight: 700;
+  line-height: 1.2;
+}
+
 .app-header__nav {
   display: flex;
   justify-content: flex-end;
